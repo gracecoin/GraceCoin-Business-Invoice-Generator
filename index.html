@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GraceCoin Business Invoice Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --dark:        #1a1a1a;
+  --placeholder: #aaaaaa;
+  --border:      #c0c0c0;
+  --border-dark: #888888;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #ddd;
+  color: var(--dark);
+  font-size: 13px;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════════════
+   ADSTERRA AD PLACEMENTS
+   (never shown in print / PDF / preview)
+══════════════════════════════════════ */
+
+/* ── Top banner ── */
+.ad-top-banner {
+  background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #fff;
+  text-align: center;
+  padding: 10px 20px;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+}
+.ad-top-banner a {
+  color: #fbbf24;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color .15s;
+}
+.ad-top-banner a:hover { color: #f59e0b; }
+.ad-top-banner .ad-badge {
+  font-size: 10px;
+  background: #fbbf24;
+  color: #1a1a2e;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* ── Inline ad card (below invoice) ── */
+.ad-inline-card {
+  max-width: 860px;
+  margin: 18px auto 0;
+  padding: 0 20px;
+}
+.ad-inline-inner {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.ad-inline-text { flex: 1; }
+.ad-inline-text .ad-label {
+  font-size: 10px;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 3px;
+  font-family: Arial, sans-serif;
+}
+.ad-inline-text .ad-headline {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  font-family: Arial, sans-serif;
+}
+.ad-inline-text .ad-subline {
+  font-size: 12px;
+  color: #666;
+  font-family: Arial, sans-serif;
+  margin-top: 2px;
+}
+.ad-inline-cta {
+  background: #f97316;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.ad-inline-cta:hover { background: #e56b0a; }
+
+/* ── Sticky bottom bar ── */
+.ad-sticky-bottom {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #1a1a2e;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  padding: 9px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 400;
+  box-shadow: 0 -2px 10px rgba(0,0,0,.2);
+}
+.ad-sticky-bottom a {
+  color: #fbbf24;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color .15s;
+}
+.ad-sticky-bottom a:hover { color: #f59e0b; }
+.ad-sticky-close {
+  position: absolute;
+  right: 14px; top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.ad-sticky-close:hover { color: #fff; }
+
+/* Make room for sticky bar */
+body { padding-bottom: 46px; }
+
+/* ── Hide ALL ad elements in print / PDF ── */
+@media print {
+  .ad-top-banner,
+  .ad-inline-card,
+  .ad-sticky-bottom { display: none !important; }
+}
+
+/* ══════════════════════════════════════
+   APP BAR
+══════════════════════════════════════ */
+.app-bar {
+  background: #2c2c2c; color: #fff;
+  padding: 9px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.app-title { font-size: 14px; font-weight: 700; white-space: nowrap; }
+.app-title em { color: #f97316; font-style: normal; }
+.app-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 5px; font-size: 12px;
+  font-family: Arial, sans-serif; font-weight: 700;
+  cursor: pointer; border: none; transition: all .15s; white-space: nowrap;
+}
+.btn-orange  { background: #f97316; color: #fff; }
+.btn-orange:hover  { background: #e56b0a; }
+.btn-dark    { background: #444; color: #fff; }
+.btn-dark:hover    { background: #555; }
+.btn-outline { background: transparent; color: #ccc; border: 1px solid #555; }
+.btn-outline:hover { background: #3a3a3a; }
+.btn-green   { background: #16a34a; color: #fff; }
+.btn-green:hover   { background: #15803d; }
+.btn-blue    { background: #2563eb; color: #fff; }
+.btn-blue:hover    { background: #1d4ed8; }
+
+.sel {
+  font-family: Arial, sans-serif; font-size: 12px;
+  padding: 5px 22px 5px 8px; border: 1px solid #555; border-radius: 5px;
+  background: #3a3a3a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 6px center;
+  -webkit-appearance: none; appearance: none; color: #ddd; cursor: pointer;
+}
+.sel:focus { outline: none; border-color: #f97316; }
+.lbl { font-size: 11px; color: #999; }
+.sep { width: 1px; height: 22px; background: #444; margin: 0 2px; }
+
+/* ══════════════════════════════════════
+   PAGE / INVOICE PAPER
+══════════════════════════════════════ */
+.page-wrap { padding: 28px 20px; max-width: 860px; margin: 0 auto; }
+
+#invoice {
+  background: #fff;
+  padding: 36px 42px 42px;
+  box-shadow: 0 2px 18px rgba(0,0,0,.18);
+}
+
+/* ══════════════════════════════════════
+   FLOATING FORMAT TOOLBAR
+   Appears on text selection inside any .rte-block
+══════════════════════════════════════ */
+#fmtBar {
+  display: none;
+  position: fixed;
+  background: #2a2a2a;
+  border-radius: 6px;
+  padding: 4px 6px;
+  gap: 3px;
+  align-items: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  z-index: 900;
+  flex-wrap: nowrap;
+}
+#fmtBar.show { display: flex; }
+.fb-btn {
+  background: none; border: 1px solid transparent; border-radius: 4px;
+  padding: 3px 8px; cursor: pointer; font-size: 12px;
+  font-family: Arial, sans-serif; color: #eee; line-height: 1.4;
+  transition: all .12s; white-space: nowrap;
+}
+.fb-btn:hover { background: #444; border-color: #666; }
+.fb-btn.on    { background: #555; border-color: #888; color: #fff; }
+.fb-sep { width: 1px; height: 16px; background: #555; margin: 0 2px; flex-shrink: 0; }
+.fb-fsz {
+  width: 36px; font-size: 11px; text-align: center;
+  background: #3a3a3a; border: 1px solid #555; border-radius: 3px;
+  padding: 2px 3px; font-family: Arial, sans-serif; color: #eee;
+}
+.fb-fsz:focus { outline: none; border-color: #888; }
+
+/* ══════════════════════════════════════
+   RICH-TEXT EDITABLE BLOCKS
+   (Company, Bill To, Notes — all identical)
+══════════════════════════════════════ */
+.rte-wrap  { flex: 1; min-width: 0; }
+
+/* The contenteditable area */
+.rte-block {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  color: var(--dark);
+  line-height: 1.8;
+  min-height: 60px;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Placeholder via data-placeholder attribute */
+.rte-block:empty::before {
+  content: attr(data-placeholder);
+  color: var(--placeholder);
+  pointer-events: none;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* "Bill To" label sits above (or inline) — shown as a static label */
+.rte-label {
+  font-size: 13px; font-weight: 700; color: var(--dark);
+  display: block; margin-bottom: 3px;
+}
+
+/* ══════════════════════════════════════
+   INVOICE HEADER  (company + logo)
+══════════════════════════════════════ */
+.inv-top {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 20px; margin-bottom: 18px;
+}
+
+/* Square logo */
+.logo-wrap { flex-shrink: 0; }
+.logo-box {
+  width: 90px; height: 90px; border-radius: 6px;
+  border: 2px dashed #c0c0c0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; color: #bbb; font-size: 11px; gap: 3px; text-align: center;
+  position: relative; overflow: hidden; transition: border-color .15s;
+}
+.logo-box:hover { border-color: #888; }
+.logo-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border-radius: 4px; }
+#logoIconText { pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+
+/* Divider */
+.inv-rule { border: none; border-top: 1.5px solid #555; margin: 18px 0 20px; }
+
+/* Invoice title */
+.inv-title-row { text-align: right; margin-bottom: 16px; }
+.inv-title { font-size: 22px; font-style: normal; font-weight: 400; color: var(--dark); }
+
+/* ══════════════════════════════════════
+   BILL TO + META
+══════════════════════════════════════ */
+.billing-meta-row {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 20px; margin-bottom: 22px;
+}
+.inv-meta { text-align: right; flex-shrink: 0; font-size: 13px; }
+.meta-line { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 3px; }
+.meta-key { color: var(--dark); font-weight: 400; }
+.meta-val {
+  font-weight: 400; color: var(--dark);
+  border: none; outline: none; background: transparent;
+  font-family: Arial, sans-serif; font-size: 13px; text-align: right; width: 130px;
+}
+.meta-val::placeholder { color: var(--placeholder); }
+
+/* ══════════════════════════════════════
+   ITEMS TABLE
+══════════════════════════════════════ */
+.items-table { width: 100%; border-collapse: collapse; }
+.items-table th {
+  font-size: 13px; font-weight: 700; color: var(--dark);
+  border: 1px solid var(--border-dark);
+  padding: 7px 10px; text-align: left;
+}
+.items-table th:nth-child(n+2) { text-align: center; }
+.items-table tbody td { border: 1px solid var(--border); padding: 0; vertical-align: top; }
+
+.item-desc {
+  font-family: Arial, sans-serif; font-size: 13px;
+  border: none; outline: none; background: transparent;
+  padding: 7px 10px; width: 100%;
+  color: var(--dark); resize: none; line-height: 1.5; display: block;
+}
+.item-desc::placeholder { color: var(--placeholder); }
+
+.item-num {
+  font-family: Arial, sans-serif; font-size: 13px;
+  border: none; outline: none; background: transparent;
+  padding: 7px 6px; width: 100%;
+  color: var(--dark); text-align: center; display: block;
+}
+.item-num::placeholder { color: var(--placeholder); }
+
+.item-amt {
+  font-size: 13px; color: var(--dark);
+  padding: 7px 10px; text-align: right; white-space: nowrap;
+}
+.rm-btn {
+  background: none; border: none; cursor: pointer; color: #c0c0c0;
+  font-size: 13px; padding: 2px 4px; transition: color .15s;
+}
+.rm-btn:hover { color: #666; }
+.total-row td {
+  border: 1px solid var(--border); padding: 7px 10px;
+  font-weight: 700; color: var(--dark);
+}
+.total-row td:nth-child(2) { text-align: right; }
+.tax-row td {
+  border: 1px solid var(--border); padding: 6px 10px;
+  font-weight: 400; color: var(--dark);
+}
+.tax-row td:nth-child(2) { text-align: right; }
+/* Hide subtotal row when no taxes active */
+#subtotalRow.hidden { display: none; }
+.add-row-btn {
+  margin-top: 8px; font-size: 12px; color: #666; background: none;
+  border: 1px dashed #c0c0c0; border-radius: 4px; cursor: pointer;
+  padding: 5px 12px; font-family: Arial, sans-serif; transition: all .15s;
+}
+.add-row-btn:hover { border-color: #888; background: #f9f9f9; color: #333; }
+
+/* Delete column — visible during editing, invisible in output */
+.del-col-th { width: 28px; }
+.del-col-td { width: 28px; }
+
+/* ══════════════════════════════════════
+   NOTES SECTION
+══════════════════════════════════════ */
+.notes-section { margin-top: 36px; }
+
+/* ══════════════════════════════════════
+   MODALS
+══════════════════════════════════════ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.55); z-index: 700;
+  align-items: flex-start; justify-content: center;
+  padding: 24px 16px; overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 8px; padding: 26px;
+  width: 430px; max-width: 95vw;
+  box-shadow: 0 16px 48px rgba(0,0,0,.3);
+  font-family: Arial, sans-serif; margin: auto;
+}
+.modal h2 { font-size: 15px; font-weight: 700; margin-bottom: 18px; }
+.modal-label { font-size: 12px; color: #555; margin-bottom: 4px; }
+.modal-input {
+  font-family: Arial, sans-serif; font-size: 13px;
+  border: 1px solid #ddd; border-radius: 5px;
+  padding: 7px 9px; width: 100%; outline: none; color: #222; margin-bottom: 12px;
+}
+.modal-input:focus { border-color: #888; }
+.modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-sel {
+  font-family: Arial, sans-serif; font-size: 13px;
+  padding: 7px 24px 7px 9px; border: 1px solid #ddd; border-radius: 5px;
+  width: 100%; outline: none; color: #222; margin-bottom: 12px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 7px center;
+  -webkit-appearance: none; appearance: none;
+}
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+.tax-tbl { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+.tax-tbl th { font-size: 11px; text-transform: uppercase; color: #888; padding: 5px 7px; text-align: left; border-bottom: 1px solid #eee; }
+.tax-tbl td { padding: 5px 7px; }
+.tax-tbl input { font-family: Arial, sans-serif; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; padding: 4px 7px; width: 100%; outline: none; color: #222; }
+.tax-tbl input:focus { border-color: #888; }
+.flex-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.toggle { width: 34px; height: 19px; background: #ccc; border-radius: 10px; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+.toggle.on { background: #555; }
+.toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; background: #fff; border-radius: 50%; transition: left .2s; }
+.toggle.on::after { left: 17px; }
+
+/* ══════════════════════════════════════
+   IN-INVOICE APP NAME  (edit mode only)
+══════════════════════════════════════ */
+.inv-app-name {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e8e8e8;
+}
+.inv-app-name em { color: #f97316; font-style: normal; }
+
+/* ══════════════════════════════════════
+   IN-INVOICE TOOLBAR  (edit mode only, stripped on output)
+══════════════════════════════════════ */
+.inv-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 22px;
+}
+.inv-toolbar .lbl-dark { font-size: 11px; color: #666; white-space: nowrap; }
+.inv-toolbar .isep { width: 1px; height: 22px; background: #d0d0d0; margin: 0 2px; }
+
+/* inner select styled for light bg */
+.inv-toolbar .isel {
+  font-family: Arial, sans-serif; font-size: 12px;
+  padding: 5px 22px 5px 8px; border: 1px solid #ccc; border-radius: 5px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 6px center;
+  -webkit-appearance: none; appearance: none; color: #333; cursor: pointer;
+}
+.inv-toolbar .isel:focus { outline: none; border-color: #888; }
+
+/* buttons inside invoice toolbar */
+.inv-toolbar .ibtn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 5px; font-size: 12px;
+  font-family: Arial, sans-serif; font-weight: 700;
+  cursor: pointer; border: 1px solid #ccc; background: #fff;
+  color: #333; transition: all .15s; white-space: nowrap;
+}
+.inv-toolbar .ibtn:hover { background: #ececec; border-color: #aaa; }
+.inv-toolbar .ibtn-blue  { background: #2563eb; color: #fff; border-color: #2563eb; }
+.inv-toolbar .ibtn-blue:hover  { background: #1d4ed8; }
+.inv-toolbar .ibtn-orange{ background: #f97316; color: #fff; border-color: #f97316; }
+.inv-toolbar .ibtn-orange:hover{ background: #e56b0a; }
+
+/* Download dropdown inside invoice */
+.inv-dl-wrap { position: relative; }
+.inv-dl-menu {
+  display: none; position: absolute; top: calc(100% + 4px); right: 0;
+  background: #fff; border: 1px solid #ddd; border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.15); min-width: 200px; z-index: 600; overflow: hidden;
+}
+.inv-dl-menu.open { display: block; }
+.inv-dl-menu button {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; font-size: 13px; font-family: Arial, sans-serif;
+  color: #222; background: none; border: none; cursor: pointer;
+  width: 100%; text-align: left; font-weight: 400; transition: background .12s;
+}
+.inv-dl-menu button:hover { background: #f5f5f5; }
+.inv-dl-menu .mdiv2 { height: 1px; background: #eee; margin: 3px 0; }
+
+/* ══════════════════════════════════════
+   PRINT
+══════════════════════════════════════ */
+@media print {
+  .app-bar, #fmtBar, .inv-app-name, .inv-toolbar, .add-row-btn, .modal-overlay { display: none !important; }
+  .rm-btn { visibility: hidden; }
+  /* Collapse delete column completely */
+  .del-col-th, .del-col-td { border: none !important; padding: 0 !important; width: 0 !important; min-width: 0 !important; overflow: hidden; }
+  body { background: #fff; }
+  .page-wrap { padding: 0; max-width: 100%; }
+  #invoice { box-shadow: none; padding: 20px 28px; }
+  .logo-box { border: none; }
+  .logo-box-empty { display: none !important; }
+  .rte-block:empty::before { content: ''; }
+}
+@media (max-width: 600px) {
+  .inv-top { flex-direction: column; }
+  .billing-meta-row { flex-direction: column; }
+  #invoice { padding: 22px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ ADSTERRA TOP BANNER ══ -->
+<div class="ad-top-banner">
+  <a href="https://www.profitablecpmratenetwork.com/uq9nyg61u?key=a14303832dbae6dd402850d8cb24a5cf"
+     target="_blank" rel="noopener sponsored">
+    <span class="ad-badge">Ad</span>
+    💡 Grow your business with smart tools &amp; offers — Click to explore
+  </a>
+</div>
+
+<!-- ══ FLOATING FORMAT TOOLBAR ══ -->
+<!-- Appears above any highlighted text inside a .rte-block -->
+<div id="fmtBar">
+  <button class="fb-btn" id="fbBold"      onmousedown="fmtDo(event,'bold')"     ><b>B</b></button>
+  <button class="fb-btn" id="fbItalic"    onmousedown="fmtDo(event,'italic')"   ><i>I</i></button>
+  <button class="fb-btn" id="fbUnderline" onmousedown="fmtDo(event,'underline')"><u>U</u></button>
+  <div class="fb-sep"></div>
+  <button class="fb-btn"                  onmousedown="fmtSize(event,-1)"       >A−</button>
+  <input  class="fb-fsz" id="fbFsz" type="number" value="13" min="8" max="48"
+          onmousedown="event.stopPropagation()"
+          onchange="fmtSizeApply(event)">
+  <button class="fb-btn"                  onmousedown="fmtSize(event,+1)"       >A+</button>
+  <div class="fb-sep"></div>
+  <button class="fb-btn"                  onmousedown="fmtClear(event)"         >✕ Clear</button>
+</div>
+
+
+<!-- ══ APP BAR — title only ══ -->
+<div class="app-bar">
+  <div class="app-title">GraceCoin <em>Business Invoice Generator</em></div>
+</div>
+
+
+<!-- ══ INVOICE ══ -->
+<div class="page-wrap">
+<div id="invoice">
+
+  <!-- ── IN-INVOICE APP NAME (edit mode only) ── -->
+  <div class="inv-app-name" id="invAppName">GraceCoin <em>Business Invoice Generator</em></div>
+
+  <!-- ── IN-INVOICE TOOLBAR (edit mode only, hidden on print/preview/download) ── -->
+  <div class="inv-toolbar" id="invToolbar">
+    <span class="lbl-dark">Currency:</span>
+    <select class="isel" id="currencySelect" onchange="updateCurrency()">
+      <option value="₦" selected>🇳🇬 Naira (₦)</option>
+      <option value="$">🇺🇸 USD ($)</option>
+      <option value="€">🇪🇺 Euro (€)</option>
+      <option value="£">🇬🇧 Pound (£)</option>
+      <option value="A$">🇦🇺 AUD</option>
+      <option value="C$">🇨🇦 CAD</option>
+      <option value="¥">🇯🇵 Yen (¥)</option>
+      <option value="₹">🇮🇳 Rupee (₹)</option>
+      <option value="AED ">🇦🇪 AED</option>
+      <option value="GH₵">🇬🇭 Cedi</option>
+      <option value="KES ">🇰🇪 KES</option>
+      <option value="ZAR ">🇿🇦 Rand</option>
+    </select>
+    <div class="isep"></div>
+    <button class="ibtn" onclick="openModal('taxModal')">% Taxes</button>
+    <button class="ibtn" onclick="openModal('discountModal')">✂ Discount</button>
+    <div class="isep"></div>
+    <button class="ibtn ibtn-blue" onclick="previewPDF()">👁 Preview</button>
+    <div class="inv-dl-wrap" id="invDlWrap">
+      <button class="ibtn ibtn-orange" onclick="toggleInvDlMenu(event)">⬇ Download &nbsp;▾</button>
+      <div class="inv-dl-menu" id="invDlMenu">
+        <button onclick="downloadPDF(); closeInvDlMenu()">
+          <span class="dl-icon">📄</span> Download as PDF
+        </button>
+        <div class="mdiv2"></div>
+        <button onclick="openModal('sendModal'); closeInvDlMenu()">
+          <span class="dl-icon">✉</span> Email
+        </button>
+        <button onclick="shareWhatsApp(); closeInvDlMenu()">
+          <span class="dl-icon">💬</span> Share via WhatsApp
+        </button>
+        <button onclick="shareTelegram(); closeInvDlMenu()">
+          <span class="dl-icon">✈</span> Share via Telegram
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER: Company (left) + Logo (right) -->
+  <div class="inv-top">
+
+    <!-- Company block — single contenteditable -->
+    <div class="rte-wrap">
+      <div class="rte-block" id="cmpBlock" contenteditable="true"
+        data-placeholder="Type your company name here&#10;Then type your address below e.g.&#10;Suite 14, No. 29 Otigba Street&#10;Off Awolowo Road, Ikeja&#10;Lagos.">
+      </div>
+    </div>
+
+    <!-- Square Logo -->
+    <div class="logo-wrap">
+      <div class="logo-box logo-box-empty" id="logoBox" onclick="document.getElementById('logoInput').click()">
+        <div id="logoIconText">
+          <span style="font-size:20px">☁</span>
+          <span style="font-size:10px;line-height:1.3;text-align:center">Upload<br>Logo</span>
+        </div>
+        <img id="logoImg" src="" style="display:none">
+        <input type="file" id="logoInput" accept="image/*" onchange="handleLogo(event)" style="display:none">
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="inv-rule">
+
+  <!-- Invoice title -->
+  <div class="inv-title-row"><span class="inv-title">Invoice</span></div>
+
+  <!-- Bill To + Meta -->
+  <div class="billing-meta-row">
+
+    <!-- Bill To block — single contenteditable -->
+    <div class="rte-wrap">
+      <span class="rte-label">Bill To</span>
+      <div class="rte-block" id="billBlock" contenteditable="true"
+        data-placeholder="Type client name or company here&#10;Then type billing address below e.g.&#10;24A, Bashorun Okusanya Street&#10;Off Admiralty Road, Lekki Phase 1&#10;Lagos.">
+      </div>
+    </div>
+
+    <!-- Invoice Meta -->
+    <div class="inv-meta">
+      <div class="meta-line">
+        <span class="meta-key">Invoice no.</span>
+        <input class="meta-val" type="text" id="invoiceNum" placeholder="e.g. INV-001">
+      </div>
+      <div class="meta-line">
+        <span class="meta-key">Date</span>
+        <input class="meta-val" type="text" id="invoiceDate" placeholder="DD.MM.YYYY"
+               maxlength="10" oninput="formatDateInput(this)">
+        <!-- hidden ISO date for filename use -->
+        <input type="hidden" id="invoiceDateISO">
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ITEMS TABLE -->
+  <table class="items-table" id="itemsTable">
+    <thead>
+      <tr>
+        <th style="width:50%">Description</th>
+        <th style="width:12%">Quantity</th>
+        <th style="width:18%">Unit price</th>
+        <th style="width:16%">Amount</th>
+        <th class="del-col-th" style="width:28px"></th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody"></tbody>
+    <tfoot id="tableFoot">
+      <tr class="subtotal-row" id="subtotalRow">
+        <td colspan="3" style="text-align:right;border:1px solid #c0c0c0;padding:6px 10px;font-weight:400;">Subtotal</td>
+        <td id="subtotalDisplay" style="border:1px solid #c0c0c0;padding:6px 10px;text-align:right;font-weight:400;">₦0.00</td>
+        <td class="del-col-td" style="border:none;padding:0;width:28px;"></td>
+      </tr>
+      <!-- Tax rows injected here by JS -->
+      <tr class="total-row" id="grandTotalRow">
+        <td colspan="3" style="text-align:right">Total</td>
+        <td id="totalDisplay">₦0.00</td>
+        <td class="del-col-td" style="border:none;padding:0;width:28px;"></td>
+      </tr>
+    </tfoot>
+  </table>
+  <button class="add-row-btn" onclick="addRow()">+ Add Item</button>
+
+  <!-- NOTES / BANK DETAILS -->
+  <div class="notes-section">
+    <div class="rte-wrap">
+      <div class="rte-block" id="notesBlock" contenteditable="true"
+        data-placeholder="Notes / Bank Details&#10;&#10;Bank Name: Your Bank Name&#10;Account Name: Your Company Name&#10;Account No: 0000000000&#10;&#10;We appreciate your patronage. Thank you.">
+      </div>
+    </div>
+  </div>
+
+</div><!-- /invoice -->
+</div><!-- /page-wrap -->
+
+<!-- ══ ADSTERRA INLINE AD CARD ══ -->
+<div class="ad-inline-card">
+  <a href="https://www.profitablecpmratenetwork.com/uq9nyg61u?key=a14303832dbae6dd402850d8cb24a5cf"
+     target="_blank" rel="noopener sponsored" style="text-decoration:none;display:block;">
+    <div class="ad-inline-inner">
+      <div class="ad-inline-text">
+        <div class="ad-label">Sponsored</div>
+        <div class="ad-headline">🚀 Need more business tools &amp; resources?</div>
+        <div class="ad-subline">Discover products and services to grow your business faster</div>
+      </div>
+      <span class="ad-inline-cta">Explore Now →</span>
+    </div>
+  </a>
+</div>
+
+<!-- ══ ADSTERRA STICKY BOTTOM BAR ══ -->
+<div class="ad-sticky-bottom" id="adStickyBottom">
+  <span>💼 Free invoice tool brought to you by <strong>GraceCoin</strong> &nbsp;|&nbsp;</span>
+  <a href="https://www.profitablecpmratenetwork.com/uq9nyg61u?key=a14303832dbae6dd402850d8cb24a5cf"
+     target="_blank" rel="noopener sponsored">
+    Support us — Click here to explore our sponsors
+  </a>
+  <button class="ad-sticky-close" onclick="document.getElementById('adStickyBottom').style.display='none';document.body.style.paddingBottom='0'" title="Close">✕</button>
+</div>
+
+
+<!-- ══ TAX MODAL ══ -->
+<div class="modal-overlay" id="taxModal">
+  <div class="modal">
+    <h2>Manage Taxes</h2>
+    <table class="tax-tbl">
+      <thead><tr><th>Name</th><th>Rate (%)</th><th></th></tr></thead>
+      <tbody id="taxBody"></tbody>
+    </table>
+    <button class="btn btn-outline" style="color:#555;border-color:#ccc;margin-bottom:6px" onclick="addTax()">+ Add Tax</button>
+    <div class="modal-actions">
+      <button class="btn btn-dark"   onclick="closeModal('taxModal')">Cancel</button>
+      <button class="btn btn-orange" onclick="applyTaxes()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DISCOUNT MODAL ══ -->
+<div class="modal-overlay" id="discountModal">
+  <div class="modal">
+    <h2>Discount</h2>
+    <div class="modal-label">Type</div>
+    <select class="modal-sel" id="discountType">
+      <option value="percent">Percentage (%)</option>
+      <option value="fixed">Fixed Amount</option>
+    </select>
+    <div class="modal-label">Amount</div>
+    <input class="modal-input" type="number" id="discountAmount" placeholder="0" min="0">
+    <div class="modal-actions">
+      <button class="btn btn-dark"   onclick="closeModal('discountModal')">Cancel</button>
+      <button class="btn btn-orange" onclick="applyDiscount()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SEND / EMAIL MODAL ══ -->
+<div class="modal-overlay" id="sendModal">
+  <div class="modal">
+    <h2>✉ Send Invoice by Email</h2>
+    <div class="modal-row" style="margin-bottom:0">
+      <div>
+        <div class="modal-label">Your Name</div>
+        <input class="modal-input" type="text" id="senderName" placeholder="Your Name">
+      </div>
+      <div>
+        <div class="modal-label">Your Email</div>
+        <input class="modal-input" type="email" id="senderEmail" placeholder="you@email.com">
+      </div>
+    </div>
+    <div class="modal-row" style="margin-bottom:0">
+      <div>
+        <div class="modal-label">Client Email</div>
+        <input class="modal-input" type="email" id="clientEmail" placeholder="client@email.com">
+      </div>
+      <div>
+        <div class="modal-label">Subject</div>
+        <input class="modal-input" type="text" id="emailSubject" placeholder="Invoice">
+      </div>
+    </div>
+    <div class="flex-row">
+      <div class="toggle" id="bccToggle" onclick="this.classList.toggle('on')"></div>
+      <span style="font-size:12px;color:#555">Send BCC copy to my email</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-dark"  onclick="closeModal('sendModal')">Cancel</button>
+      <button class="btn btn-green" onclick="sendInvoice()">✉ Send</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let currency    = '₦';
+let taxes       = [];
+let discount    = { type:'percent', amount:0 };
+let rowCount    = 0;
+let taxRowCount = 0;
+
+/* track which rte-block is currently active */
+let activeRte = null;
+/* saved selection for toolbar actions (mousedown steals focus) */
+let savedRange = null;
+
+/* ── INIT ── */
+(function initDate() {
+  const now  = new Date();
+  const dd   = String(now.getDate()).padStart(2,'0');
+  const mm   = String(now.getMonth()+1).padStart(2,'0');
+  const yyyy = now.getFullYear();
+  document.getElementById('invoiceDate').value    = `${dd}.${mm}.${yyyy}`;
+  document.getElementById('invoiceDateISO').value = `${yyyy}.${mm}.${dd}`;
+})();
+addRow(); addRow(); addRow();
+
+/* ══════════════════════════════════════
+   DATE INPUT  — enforces DD.MM.YY as user types
+   and keeps hidden ISO field in sync for filename
+══════════════════════════════════════ */
+function formatDateInput(el) {
+  /* Strip everything except digits */
+  let v = el.value.replace(/[^0-9]/g, '');
+  /* Insert dots automatically: DD.MM.YYYY */
+  if (v.length > 4)       v = v.slice(0,2) + '.' + v.slice(2,4) + '.' + v.slice(4,8);
+  else if (v.length > 2)  v = v.slice(0,2) + '.' + v.slice(2);
+  el.value = v;
+  /* Sync ISO hidden field when full date entered (DD.MM.YYYY = 10 chars) */
+  if (v.length === 10) {
+    const dd   = v.slice(0,2);
+    const mm   = v.slice(3,5);
+    const yyyy = v.slice(6,10);
+    document.getElementById('invoiceDateISO').value = `${yyyy}.${mm}.${dd}`;
+  }
+}
+
+/* ══════════════════════════════════════
+   PASTE HANDLER — strip all formatting,
+   insert as plain text, preserve line breaks
+══════════════════════════════════════ */
+document.querySelectorAll('.rte-block').forEach(el => {
+  el.addEventListener('paste', e => {
+    e.preventDefault();
+    const clip = e.clipboardData || window.clipboardData;
+    /* Try to get plain text; fall back to stripping HTML */
+    let text = clip.getData('text/plain');
+    if (!text) {
+      const html = clip.getData('text/html');
+      const tmp  = document.createElement('div');
+      tmp.innerHTML = html;
+      text = tmp.innerText || tmp.textContent || '';
+    }
+    /* Insert at cursor position */
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    /* Split on newlines and insert as separate text/br nodes */
+    const lines = text.split(/\r?\n/);
+    lines.forEach((line, i) => {
+      if (i > 0) range.insertNode(document.createElement('br'));
+      range.insertNode(document.createTextNode(line));
+      range.collapse(false);
+    });
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+
+  /* Track active block */
+  el.addEventListener('focus', () => { activeRte = el; });
+  el.addEventListener('blur',  () => {
+    /* Don't clear if blurring into the toolbar */
+  });
+});
+
+/* ══════════════════════════════════════
+   FLOATING FORMAT TOOLBAR
+   Shows above the selected text
+══════════════════════════════════════ */
+const fmtBar = document.getElementById('fmtBar');
+
+document.addEventListener('mouseup', e => {
+  /* If click was inside the toolbar, do nothing here */
+  if (fmtBar.contains(e.target)) return;
+
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || sel.toString().trim() === '') {
+    hideFmtBar();
+    return;
+  }
+
+  /* Only show if selection is inside a .rte-block */
+  const range   = sel.getRangeAt(0);
+  const inBlock = range.commonAncestorContainer.nodeType === 3
+    ? range.commonAncestorContainer.parentElement.closest('.rte-block')
+    : range.commonAncestorContainer.closest
+      ? range.commonAncestorContainer.closest('.rte-block')
+      : null;
+
+  if (!inBlock) { hideFmtBar(); return; }
+
+  savedRange = range.cloneRange();
+  activeRte  = inBlock;
+
+  /* Position toolbar above the selection */
+  const rect = range.getBoundingClientRect();
+  const barW = 300; /* approximate */
+  let left   = rect.left + (rect.width / 2) - (barW / 2);
+  left = Math.max(8, Math.min(left, window.innerWidth - barW - 8));
+  const top  = rect.top + window.scrollY - 46;
+
+  fmtBar.style.left = left + 'px';
+  fmtBar.style.top  = top  + 'px';
+  fmtBar.classList.add('show');
+
+  /* Sync toolbar button states */
+  syncFmtBar();
+});
+
+/* Also show on keyboard selection */
+document.addEventListener('keyup', e => {
+  if (!activeRte) return;
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) { hideFmtBar(); return; }
+  const range = sel.getRangeAt(0);
+  const inBlock = range.commonAncestorContainer.nodeType === 3
+    ? range.commonAncestorContainer.parentElement.closest('.rte-block')
+    : (range.commonAncestorContainer.closest
+       ? range.commonAncestorContainer.closest('.rte-block') : null);
+  if (!inBlock) { hideFmtBar(); return; }
+  savedRange = range.cloneRange();
+  syncFmtBar();
+});
+
+function hideFmtBar() {
+  fmtBar.classList.remove('show');
+  savedRange = null;
+}
+
+function syncFmtBar() {
+  document.getElementById('fbBold').classList.toggle('on',      document.queryCommandState('bold'));
+  document.getElementById('fbItalic').classList.toggle('on',    document.queryCommandState('italic'));
+  document.getElementById('fbUnderline').classList.toggle('on', document.queryCommandState('underline'));
+  /* Read current font size from selection */
+  const sz = document.queryCommandValue('fontSize');
+  /* queryCommandValue for fontSize returns 1-7 legacy values; we use our own spans instead */
+  const fsz = getSelectionFontSize();
+  document.getElementById('fbFsz').value = fsz || 13;
+}
+
+function getSelectionFontSize() {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return 13;
+  let node = sel.getRangeAt(0).startContainer;
+  while (node && node.nodeType !== 1) node = node.parentNode;
+  if (!node) return 13;
+  const fs = window.getComputedStyle(node).fontSize;
+  return fs ? Math.round(parseFloat(fs)) : 13;
+}
+
+/* ── RESTORE SAVED SELECTION ── */
+function restoreSel() {
+  if (!savedRange) return false;
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(savedRange);
+  return true;
+}
+
+/* ══════════════════════════════════════
+   FORMAT ACTIONS
+   All use onmousedown + preventDefault so
+   focus never leaves the rte-block
+══════════════════════════════════════ */
+function fmtDo(e, cmd) {
+  e.preventDefault();
+  if (!restoreSel()) return;
+  document.execCommand(cmd, false, null);
+  syncFmtBar();
+  /* Update saved range after command */
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+}
+
+function fmtSize(e, delta) {
+  e.preventDefault();
+  if (!restoreSel()) return;
+  const inp = document.getElementById('fbFsz');
+  const cur = parseInt(inp.value) || 13;
+  const nxt = Math.min(48, Math.max(8, cur + delta));
+  inp.value = nxt;
+  applyFontSize(nxt);
+  /* toolbar stays open — user may press again */
+}
+
+function fmtSizeApply(e) {
+  /* Called when user manually types a number in the size box */
+  if (!restoreSel()) return;
+  const sz = Math.min(48, Math.max(8, parseInt(e.target.value) || 13));
+  e.target.value = sz;
+  applyFontSize(sz);
+}
+
+function applyFontSize(px) {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+
+  const range = sel.getRangeAt(0);
+
+  /* ── Strategy: extract selected content, wrap in a span, re-insert ── */
+  /* First strip any existing font-size spans *within* the selection so we
+     don't double-nest, then wrap everything in one fresh span. */
+
+  /* Clone the range content into a temp div so we can unwrap nested size spans */
+  const frag = range.extractContents();
+  const tmp  = document.createElement('div');
+  tmp.appendChild(frag);
+
+  /* Remove font-size style from any nested spans (flatten size spans only) */
+  tmp.querySelectorAll('span[style]').forEach(s => {
+    if (s.style.fontSize) s.style.removeProperty('font-size');
+    /* If span has no remaining inline style, unwrap it */
+    if (!s.getAttribute('style') || s.style.cssText.trim() === '') {
+      const parent = s.parentNode;
+      while (s.firstChild) parent.insertBefore(s.firstChild, s);
+      parent.removeChild(s);
+    }
+  });
+
+  /* Wrap all content in a new span with the desired size */
+  const span = document.createElement('span');
+  span.style.fontSize = px + 'px';
+  while (tmp.firstChild) span.appendChild(tmp.firstChild);
+  range.insertNode(span);
+
+  /* Re-select the span so the toolbar stays live for further adjustments */
+  const newRange = document.createRange();
+  newRange.selectNodeContents(span);
+  sel.removeAllRanges();
+  sel.addRange(newRange);
+
+  /* Keep savedRange updated so A−/A+ can fire again immediately */
+  savedRange = newRange.cloneRange();
+
+  /* Update the size input to reflect new value — keep toolbar open */
+  document.getElementById('fbFsz').value = px;
+  /* Do NOT hide the toolbar — user may want to keep adjusting */
+}
+
+function fmtClear(e) {
+  e.preventDefault();
+  if (!restoreSel()) return;
+  document.execCommand('removeFormat', false, null);
+  /* Also strip any inline font-size spans */
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) {
+    const range = sel.getRangeAt(0);
+    const frag  = range.cloneContents();
+    const tmp   = document.createElement('div');
+    tmp.appendChild(frag);
+    const plain = tmp.innerText || tmp.textContent;
+    range.deleteContents();
+    range.insertNode(document.createTextNode(plain));
+  }
+  hideFmtBar();
+}
+
+/* Hide toolbar on click outside */
+document.addEventListener('mousedown', e => {
+  if (!fmtBar.contains(e.target) && !e.target.closest('.rte-block')) {
+    hideFmtBar();
+  }
+});
+
+/* ══════════════════════════════════════
+   CURRENCY
+══════════════════════════════════════ */
+function updateCurrency() {
+  const sel = document.getElementById('currencySelect');
+  currency = sel.options[sel.selectedIndex].value;
+  recalc();
+}
+function fmt(n) {
+  const num = parseFloat(n || 0);
+  return currency + num.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+/* ══════════════════════════════════════
+   ROWS
+══════════════════════════════════════ */
+function addRow() {
+  rowCount++;
+  const id = rowCount;
+  const tr = document.createElement('tr');
+  tr.id = 'row' + id;
+  tr.innerHTML = `
+    <td><textarea class="item-desc" id="desc${id}" rows="1"
+          placeholder="Item description" oninput="autoH(this)"></textarea></td>
+    <td><input class="item-num" type="number" id="qty${id}"
+          value="1" min="0" step="any" oninput="recalc()"></td>
+    <td><input class="item-num" type="text" id="rate${id}"
+          inputmode="decimal" oninput="sanitiseRate(this)" placeholder="0.00"></td>
+    <td class="item-amt" id="amt${id}">₦0.00</td>
+    <td class="del-col-td" style="padding:4px;text-align:center;border:1px solid #c0c0c0;width:28px;">
+      <button class="rm-btn" onclick="removeRow(${id})">✕</button>
+    </td>`;
+  document.getElementById('itemsBody').appendChild(tr);
+}
+function autoH(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+function removeRow(id) { document.getElementById('row' + id)?.remove(); recalc(); }
+function sanitiseRate(el) {
+  let v = el.value.replace(/[^0-9.]/g, '');
+  const p = v.split('.');
+  if (p.length > 2) v = p[0] + '.' + p.slice(1).join('');
+  el.value = v; recalc();
+}
+
+/* ══════════════════════════════════════
+   RECALCULATE — renders subtotal + tax lines + grand total
+══════════════════════════════════════ */
+function recalc() {
+  let sub = 0;
+  document.querySelectorAll('#itemsBody tr').forEach(tr => {
+    const id = tr.id.replace('row','');
+    const q  = parseFloat(document.getElementById('qty'  + id)?.value) || 0;
+    const r  = parseFloat(document.getElementById('rate' + id)?.value?.replace(/,/g,'')) || 0;
+    const a  = q * r;
+    const el = document.getElementById('amt' + id);
+    if (el) el.textContent = fmt(a);
+    sub += a;
+  });
+
+  /* Discount */
+  let disc = 0;
+  if (discount.amount > 0)
+    disc = discount.type === 'percent' ? sub*(discount.amount/100) : parseFloat(discount.amount);
+  const afterDisc = sub - disc;
+
+  /* Remove old tax rows from tfoot */
+  document.querySelectorAll('#tableFoot .tax-row').forEach(r => r.remove());
+
+  /* Show/hide subtotal row */
+  const subRow = document.getElementById('subtotalRow');
+  const hasTaxOrDisc = taxes.length > 0 || disc > 0;
+  subRow.classList.toggle('hidden', !hasTaxOrDisc);
+  document.getElementById('subtotalDisplay').textContent = fmt(sub);
+
+  /* Insert tax rows before grandTotalRow */
+  const grandTotalRow = document.getElementById('grandTotalRow');
+  let taxTotal = 0;
+
+  /* Discount row */
+  if (disc > 0) {
+    const dr = document.createElement('tr');
+    dr.className = 'tax-row';
+    const label = discount.type === 'percent' ? `Discount (${discount.amount}%)` : 'Discount';
+    dr.innerHTML = `
+      <td colspan="3" style="text-align:right;font-style:italic;">${label}</td>
+      <td style="text-align:right;font-style:italic;">− ${fmt(disc)}</td>
+      <td class="del-col-td" style="border:none;padding:0;width:28px;"></td>`;
+    grandTotalRow.parentNode.insertBefore(dr, grandTotalRow);
+  }
+
+  /* Tax rows */
+  taxes.forEach(t => {
+    const taxAmt = afterDisc * (t.rate / 100);
+    taxTotal += taxAmt;
+    const tr = document.createElement('tr');
+    tr.className = 'tax-row';
+    tr.innerHTML = `
+      <td colspan="3" style="text-align:right;">${t.name} (${t.rate}%)</td>
+      <td style="text-align:right;">${fmt(taxAmt)}</td>
+      <td class="del-col-td" style="border:none;padding:0;width:28px;"></td>`;
+    grandTotalRow.parentNode.insertBefore(tr, grandTotalRow);
+  });
+
+  const grand = afterDisc + taxTotal;
+  document.getElementById('totalDisplay').textContent = fmt(grand);
+}
+
+/* ══════════════════════════════════════
+   TAXES / DISCOUNT
+══════════════════════════════════════ */
+function addTax() {
+  taxRowCount++;
+  const id = taxRowCount;
+  const tr = document.createElement('tr');
+  tr.id = 'txr'+id;
+  tr.innerHTML=`
+    <td><input type="text"   placeholder="e.g. VAT" id="txn${id}"></td>
+    <td><input type="number" placeholder="0" id="txv${id}" min="0" max="100" step="any"></td>
+    <td><button class="rm-btn" onclick="document.getElementById('txr${id}').remove()">✕</button></td>`;
+  document.getElementById('taxBody').appendChild(tr);
+}
+function applyTaxes() {
+  taxes=[];
+  document.querySelectorAll('#taxBody tr').forEach(tr=>{
+    const id=tr.id.replace('txr','');
+    const n=document.getElementById('txn'+id)?.value||'';
+    const v=parseFloat(document.getElementById('txv'+id)?.value)||0;
+    if(n&&v) taxes.push({name:n,rate:v});
+  });
+  closeModal('taxModal'); recalc();
+}
+function applyDiscount() {
+  discount.type  =document.getElementById('discountType').value;
+  discount.amount=parseFloat(document.getElementById('discountAmount').value)||0;
+  closeModal('discountModal'); recalc();
+}
+
+/* ══════════════════════════════════════
+   LOGO
+══════════════════════════════════════ */
+function handleLogo(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('logoImg').src = ev.target.result;
+    document.getElementById('logoImg').style.display = 'block';
+    document.getElementById('logoIconText').style.display = 'none';
+    /* Remove empty marker so logo shows in output */
+    document.getElementById('logoBox').classList.remove('logo-box-empty');
+  };
+  r.readAsDataURL(f);
+}
+
+/* ══════════════════════════════════════
+   MODALS
+══════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+
+/* ══════════════════════════════════════
+   BUILD CLEAN PRINT HTML
+══════════════════════════════════════ */
+function buildPrintHTML() {
+  const inv   = document.getElementById('invoice');
+  const clone = inv.cloneNode(true);
+
+  /* Remove edit-only UI — keep rm-btn cells but make buttons invisible */
+  clone.querySelectorAll('.inv-app-name, .inv-toolbar, .add-row-btn, input[type=file], .ad-top-banner, .ad-inline-card, .ad-sticky-bottom').forEach(el => el.remove());
+  clone.querySelectorAll('.rm-btn').forEach(el => { el.style.visibility = 'hidden'; });
+  /* Collapse delete column cells — no border, no padding, no width */
+  clone.querySelectorAll('.del-col-th, .del-col-td').forEach(el => {
+    el.style.border   = 'none';
+    el.style.padding  = '0';
+    el.style.width    = '0';
+    el.style.minWidth = '0';
+    el.style.overflow = 'hidden';
+  });
+  /* Hide empty logo box (no image uploaded) */
+  clone.querySelectorAll('.logo-box-empty').forEach(el => { el.style.display = 'none'; });
+  clone.querySelectorAll('.rm-btn').forEach(el => {
+    el.style.visibility = 'hidden';
+    el.disabled = true;
+  });
+
+  /* Remove contenteditable attribute */
+  clone.querySelectorAll('[contenteditable]').forEach(el=>{
+    el.removeAttribute('contenteditable');
+    el.removeAttribute('data-placeholder');
+  });
+
+  /* Freeze <input> → <span> */
+  clone.querySelectorAll('input').forEach(orig=>{
+    const live=document.getElementById(orig.id);
+    const span=document.createElement('span');
+    span.innerHTML = live ? escapeHTML(live.value) : escapeHTML(orig.value);
+    span.className =orig.className;
+    span.style.display='inline';
+    orig.replaceWith(span);
+  });
+
+  /* Freeze <textarea> → <div> */
+  clone.querySelectorAll('textarea').forEach(orig=>{
+    const live=document.getElementById(orig.id);
+    const div=document.createElement('div');
+    div.textContent    = live ? live.value : orig.value;
+    div.className      = orig.className;
+    div.style.cssText  = orig.style.cssText;
+    div.style.whiteSpace='pre-wrap';
+    div.style.color    ='#1a1a1a';
+    orig.replaceWith(div);
+  });
+
+  const lb=clone.querySelector('.logo-box');
+  if(lb) lb.style.border='none';
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1a1a1a;font-size:13px;}
+#invoice{padding:36px 42px 42px;max-width:860px;margin:0 auto;}
+.inv-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:18px;}
+.rte-wrap{flex:1;min-width:0;}
+.rte-block{font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:400;font-style:normal;color:#1a1a1a;line-height:1.8;white-space:pre-wrap;word-break:break-word;}
+.rte-label{font-size:13px;font-weight:700;color:#1a1a1a;display:block;margin-bottom:3px;}
+.logo-box{width:90px;height:90px;border-radius:6px;overflow:hidden;flex-shrink:0;position:relative;}
+.logo-box img{width:100%;height:100%;object-fit:contain;}
+.inv-rule{border:none;border-top:1.5px solid #555;margin:18px 0 20px;}
+.inv-title-row{text-align:right;margin-bottom:16px;}
+.inv-title{font-size:22px;font-style:normal;font-weight:400;color:#1a1a1a;}
+.billing-meta-row{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px;}
+.inv-meta{text-align:right;flex-shrink:0;font-size:13px;}
+.meta-line{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:3px;}
+.meta-val{font-size:13px;font-weight:400;color:#1a1a1a;text-align:right;display:inline;}
+.items-table{width:100%;border-collapse:collapse;}
+.items-table th{font-size:13px;font-weight:700;border:1px solid #888;padding:7px 10px;text-align:left;color:#1a1a1a;}
+.items-table th:nth-child(n+2){text-align:center;}
+.items-table td{border:1px solid #c0c0c0;padding:0;vertical-align:top;}
+.item-desc{font-size:13px;padding:7px 10px;color:#1a1a1a;white-space:pre-wrap;display:block;}
+.item-num{font-size:13px;padding:7px 6px;color:#1a1a1a;text-align:center;display:block;}
+.item-amt{font-size:13px;color:#1a1a1a;padding:7px 10px;text-align:right;white-space:nowrap;}
+.rm-btn{visibility:hidden;}
+.del-col-th,.del-col-td{border:none!important;padding:0!important;width:0!important;min-width:0!important;overflow:hidden;}
+.subtotal-row td{border:1px solid #c0c0c0;padding:6px 10px;font-weight:400;color:#1a1a1a;}
+.tax-row td{border:1px solid #c0c0c0;padding:6px 10px;font-weight:400;color:#1a1a1a;}
+#subtotalRow.hidden{display:none;}
+.total-row td{border:1px solid #c0c0c0;padding:7px 10px;font-weight:700;color:#1a1a1a;}
+.total-row td:nth-child(2){text-align:right;}
+.notes-section{margin-top:36px;}
+</style>
+</head><body><div id="invoice">${clone.innerHTML}</div></body></html>`;
+}
+
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ══════════════════════════════════════
+   PREVIEW — new tab
+══════════════════════════════════════ */
+function previewPDF() {
+  const html=buildPrintHTML();
+  const blob=new Blob([html],{type:'text/html'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
+
+/* ══════════════════════════════════════
+   DOWNLOAD AS PDF — saves actual .pdf file to PC
+══════════════════════════════════════ */
+function downloadPDF() {
+  /* Build a clean off-screen clone of the invoice */
+  const inv   = document.getElementById('invoice');
+  const clone = inv.cloneNode(true);
+
+  /* Hide edit-only controls */
+  clone.querySelectorAll('.inv-app-name,.inv-toolbar,.app-bar,#fmtBar,.add-row-btn,input[type=file],.ad-top-banner,.ad-inline-card,.ad-sticky-bottom').forEach(el => el.remove());
+  clone.querySelectorAll('.rm-btn').forEach(el => { el.style.visibility = 'hidden'; });
+  /* Collapse delete column — no visible border or space */
+  clone.querySelectorAll('.del-col-th, .del-col-td').forEach(el => {
+    el.style.border   = 'none';
+    el.style.padding  = '0';
+    el.style.width    = '0';
+    el.style.minWidth = '0';
+    el.style.overflow = 'hidden';
+  });
+  /* Hide empty logo box */
+  clone.querySelectorAll('.logo-box-empty').forEach(el => { el.style.display = 'none'; });
+  clone.querySelectorAll('[contenteditable]').forEach(el => {
+    el.removeAttribute('contenteditable');
+    el.removeAttribute('data-placeholder');
+  });
+  /* Freeze inputs */
+  clone.querySelectorAll('input').forEach(orig => {
+    const live = document.getElementById(orig.id);
+    const span = document.createElement('span');
+    span.textContent = live ? live.value : orig.value;
+    span.className   = orig.className;
+    span.style.display = 'inline';
+    orig.replaceWith(span);
+  });
+  /* Freeze textareas */
+  clone.querySelectorAll('textarea').forEach(orig => {
+    const live = document.getElementById(orig.id);
+    const div  = document.createElement('div');
+    div.textContent    = live ? live.value : orig.value;
+    div.className      = orig.className;
+    div.style.cssText  = orig.style.cssText;
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.color    = '#1a1a1a';
+    orig.replaceWith(div);
+  });
+  const lb = clone.querySelector('.logo-box');
+  if (lb) lb.style.border = 'none';
+
+  /* Wrap in a styled container */
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'background:#fff;padding:36px 42px 42px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1a1a1a;max-width:860px;';
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  /* Build filename: YYYY.MM.DD_InvoiceNumber */
+  const isoDate  = document.getElementById('invoiceDateISO').value;
+  const datePart = isoDate || new Date().toISOString().slice(0,10).replace(/-/g,'.');
+  const numPart  = (document.getElementById('invoiceNum').value || 'invoice').trim();
+  const filename = `${datePart}_${numPart}.pdf`;
+
+  const opt = {
+    margin:      [8, 8, 8, 8],
+    filename:    filename,
+    image:       { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(wrapper).save().then(() => {
+    document.body.removeChild(wrapper);
+  }).catch(err => {
+    document.body.removeChild(wrapper);
+    console.error('PDF error:', err);
+    alert('Could not generate PDF. Please try Print / PDF instead.');
+  });
+}
+
+/* ══════════════════════════════════════
+   IN-INVOICE DOWNLOAD DROPDOWN
+══════════════════════════════════════ */
+function toggleInvDlMenu(e){e.stopPropagation();document.getElementById('invDlMenu').classList.toggle('open');}
+function closeInvDlMenu(){document.getElementById('invDlMenu').classList.remove('open');}
+document.addEventListener('click', closeInvDlMenu);
+
+/* ══════════════════════════════════════
+   SHARE
+══════════════════════════════════════ */
+function getShareText(){
+  const co  = document.getElementById('cmpBlock').innerText.split('\n')[0]||'Invoice';
+  const num = document.getElementById('invoiceNum').value||'';
+  const tot = document.getElementById('totalDisplay').textContent||'';
+  return `Invoice from ${co}\nInvoice No: ${num}\nTotal: ${tot}\n\nPlease find the invoice attached. Thank you!`;
+}
+function shareWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(getShareText()),'_blank');}
+function shareTelegram(){window.open('https://t.me/share/url?url=&text='+encodeURIComponent(getShareText()),'_blank');}
+
+/* ══════════════════════════════════════
+   SEND EMAIL
+══════════════════════════════════════ */
+function sendInvoice(){
+  const to=document.getElementById('clientEmail').value;
+  if(!to){alert('Please enter the client email address.');return;}
+  const co  =document.getElementById('cmpBlock').innerText.split('\n')[0]||'Us';
+  const subj=document.getElementById('emailSubject').value||('Invoice from '+co);
+  const body='Please find your invoice attached.\n\nThank you for your business!';
+  window.open(`mailto:${to}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`);
+  closeModal('sendModal');
+}
+</script>
+</body>
+</html>
