@@ -246,12 +246,74 @@ body { padding-bottom: 46px; }
 .fb-fsz:focus { outline: none; border-color: #888; }
 
 /* ══════════════════════════════════════
-   RICH-TEXT EDITABLE BLOCKS
-   (Company, Bill To, Notes — all identical)
+   RICH-TEXT EDITABLE ZONES
+   Styled containers — edit mode only
 ══════════════════════════════════════ */
 .rte-wrap  { flex: 1; min-width: 0; }
 
-/* The contenteditable area */
+/* Outer styled rounded rectangle */
+.rte-zone {
+  position: relative;
+  border: 1.5px dashed #c8c8c8;
+  border-radius: 8px;
+  background: #fafafa;
+  padding: 18px 12px 10px 12px;
+  margin-top: 8px;
+  transition: border-color .18s, background .18s;
+  cursor: text;
+}
+.rte-zone:hover {
+  border-color: #a0a0a0;
+  background: #f5f5f5;
+}
+.rte-zone.focused {
+  border: 1.5px solid #888;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.05);
+}
+
+/* Floating section label — top-left pill badge */
+.rte-zone-label {
+  position: absolute;
+  top: -11px;
+  left: 10px;
+  background: #ececec;
+  border: 1px solid #d0d0d0;
+  border-radius: 20px;
+  padding: 1px 10px;
+  font-size: 10px;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  color: #777;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* "✏ Click to type" hint — top-right pill */
+.rte-zone-hint {
+  position: absolute;
+  top: -11px;
+  right: 10px;
+  background: #e8f4ff;
+  border: 1px solid #b8d8f0;
+  border-radius: 20px;
+  padding: 1px 10px;
+  font-size: 10px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  color: #5a9abf;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+/* Hide hint once zone has content */
+.rte-zone.has-content .rte-zone-hint { display: none; }
+
+/* The actual contenteditable area */
 .rte-block {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 13px;
@@ -259,22 +321,23 @@ body { padding-bottom: 46px; }
   font-style: normal;
   color: var(--dark);
   line-height: 1.8;
-  min-height: 60px;
+  min-height: 58px;
   outline: none;
   white-space: pre-wrap;
   word-break: break-word;
+  background: transparent;
 }
 
-/* Placeholder via data-placeholder attribute */
+/* Placeholder text */
 .rte-block:empty::before {
   content: attr(data-placeholder);
-  color: var(--placeholder);
+  color: #c0c0c0;
   pointer-events: none;
   font-weight: 400;
   font-style: normal;
 }
 
-/* "Bill To" label sits above (or inline) — shown as a static label */
+/* "Bill To" bold static label shown above bill block */
 .rte-label {
   font-size: 13px; font-weight: 700; color: var(--dark);
   display: block; margin-bottom: 3px;
@@ -519,6 +582,9 @@ body { padding-bottom: 46px; }
   #invoice { box-shadow: none; padding: 20px 28px; }
   .logo-box { border: none; }
   .logo-box-empty { display: none !important; }
+  /* Strip zone styling */
+  .rte-zone { border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; margin-top: 0 !important; }
+  .rte-zone-label, .rte-zone-hint { display: none !important; }
   .rte-block:empty::before { content: ''; }
 }
 @media (max-width: 600px) {
@@ -616,8 +682,12 @@ body { padding-bottom: 46px; }
 
     <!-- Company block — single contenteditable -->
     <div class="rte-wrap">
-      <div class="rte-block" id="cmpBlock" contenteditable="true"
-        data-placeholder="Type your company name here&#10;Then type your address below e.g.&#10;Suite 14, No. 29 Otigba Street&#10;Off Awolowo Road, Ikeja&#10;Lagos.">
+      <div class="rte-zone" id="cmpZone">
+        <span class="rte-zone-label">Company &amp; Address</span>
+        <span class="rte-zone-hint">✏ Click to type</span>
+        <div class="rte-block" id="cmpBlock" contenteditable="true"
+          data-placeholder="Your Company Name&#10;Address line 1, Address line 2&#10;City.">
+        </div>
       </div>
     </div>
 
@@ -645,9 +715,12 @@ body { padding-bottom: 46px; }
 
     <!-- Bill To block — single contenteditable -->
     <div class="rte-wrap">
-      <span class="rte-label">Bill To</span>
-      <div class="rte-block" id="billBlock" contenteditable="true"
-        data-placeholder="Type client name or company here&#10;Then type billing address below e.g.&#10;24A, Bashorun Okusanya Street&#10;Off Admiralty Road, Lekki Phase 1&#10;Lagos.">
+      <div class="rte-zone" id="billZone">
+        <span class="rte-zone-label">Bill To</span>
+        <span class="rte-zone-hint">✏ Click to type</span>
+        <div class="rte-block" id="billBlock" contenteditable="true"
+          data-placeholder="Client Name / Company&#10;Address line 1, Address line 2&#10;Area, City.">
+        </div>
       </div>
     </div>
 
@@ -699,8 +772,12 @@ body { padding-bottom: 46px; }
   <!-- NOTES / BANK DETAILS -->
   <div class="notes-section">
     <div class="rte-wrap">
-      <div class="rte-block" id="notesBlock" contenteditable="true"
-        data-placeholder="Notes / Bank Details&#10;&#10;Bank Name: Your Bank Name&#10;Account Name: Your Company Name&#10;Account No: 0000000000&#10;&#10;We appreciate your patronage. Thank you.">
+      <div class="rte-zone" id="notesZone">
+        <span class="rte-zone-label">Notes / Bank Details</span>
+        <span class="rte-zone-hint">✏ Click to type</span>
+        <div class="rte-block" id="notesBlock" contenteditable="true"
+          data-placeholder="Bank Name: Your Bank Name&#10;Account Name: Your Company Name&#10;Account No: 0000000000&#10;&#10;We appreciate your patronage. Thank you.">
+        </div>
       </div>
     </div>
   </div>
@@ -880,14 +957,35 @@ document.querySelectorAll('.rte-block').forEach(el => {
     });
     sel.removeAllRanges();
     sel.addRange(range);
+    updateZoneState(el);
   });
 
-  /* Track active block */
-  el.addEventListener('focus', () => { activeRte = el; });
-  el.addEventListener('blur',  () => {
-    /* Don't clear if blurring into the toolbar */
+  /* Track active block + highlight zone */
+  el.addEventListener('focus', () => {
+    activeRte = el;
+    const zone = el.closest('.rte-zone');
+    if (zone) zone.classList.add('focused');
   });
+
+  el.addEventListener('blur', () => {
+    const zone = el.closest('.rte-zone');
+    if (zone) zone.classList.remove('focused');
+  });
+
+  /* Update has-content class as user types */
+  el.addEventListener('input', () => { updateZoneState(el); });
 });
+
+/* Update zone's has-content class based on whether block has text */
+function updateZoneState(el) {
+  const zone = el.closest('.rte-zone');
+  if (!zone) return;
+  const hasText = el.innerText.trim().length > 0;
+  zone.classList.toggle('has-content', hasText);
+}
+
+/* Init zone states */
+document.querySelectorAll('.rte-block').forEach(el => updateZoneState(el));
 
 /* ══════════════════════════════════════
    FLOATING FORMAT TOOLBAR
@@ -1269,10 +1367,15 @@ function buildPrintHTML() {
   });
   /* Hide empty logo box (no image uploaded) */
   clone.querySelectorAll('.logo-box-empty').forEach(el => { el.style.display = 'none'; });
-  clone.querySelectorAll('.rm-btn').forEach(el => {
-    el.style.visibility = 'hidden';
-    el.disabled = true;
+  /* Strip rte-zone styling — clean output with no borders or badges */
+  clone.querySelectorAll('.rte-zone').forEach(z => {
+    z.style.border     = 'none';
+    z.style.background = 'transparent';
+    z.style.boxShadow  = 'none';
+    z.style.padding    = '0';
+    z.style.marginTop  = '0';
   });
+  clone.querySelectorAll('.rte-zone-label, .rte-zone-hint').forEach(el => el.remove());
 
   /* Remove contenteditable attribute */
   clone.querySelectorAll('[contenteditable]').forEach(el=>{
@@ -1378,6 +1481,15 @@ function downloadPDF() {
   });
   /* Hide empty logo box */
   clone.querySelectorAll('.logo-box-empty').forEach(el => { el.style.display = 'none'; });
+  /* Strip rte-zone styling */
+  clone.querySelectorAll('.rte-zone').forEach(z => {
+    z.style.border     = 'none';
+    z.style.background = 'transparent';
+    z.style.boxShadow  = 'none';
+    z.style.padding    = '0';
+    z.style.marginTop  = '0';
+  });
+  clone.querySelectorAll('.rte-zone-label, .rte-zone-hint').forEach(el => el.remove());
   clone.querySelectorAll('[contenteditable]').forEach(el => {
     el.removeAttribute('contenteditable');
     el.removeAttribute('data-placeholder');
