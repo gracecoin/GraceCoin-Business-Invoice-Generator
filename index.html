@@ -24,142 +24,6 @@ body {
 }
 
 /* ══════════════════════════════════════
-   ADSTERRA AD PLACEMENTS
-   (never shown in print / PDF / preview)
-══════════════════════════════════════ */
-
-/* ── Top banner ── */
-.ad-top-banner {
-  background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  color: #fff;
-  text-align: center;
-  padding: 10px 20px;
-  font-family: Arial, sans-serif;
-  font-size: 13px;
-  letter-spacing: 0.2px;
-}
-.ad-top-banner a {
-  color: #fbbf24;
-  text-decoration: none;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: color .15s;
-}
-.ad-top-banner a:hover { color: #f59e0b; }
-.ad-top-banner .ad-badge {
-  font-size: 10px;
-  background: #fbbf24;
-  color: #1a1a2e;
-  border-radius: 3px;
-  padding: 1px 5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-}
-
-/* ── Inline ad card (below invoice) ── */
-.ad-inline-card {
-  max-width: 860px;
-  margin: 18px auto 0;
-  padding: 0 20px;
-}
-.ad-inline-inner {
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
-}
-.ad-inline-text { flex: 1; }
-.ad-inline-text .ad-label {
-  font-size: 10px;
-  color: #aaa;
-  text-transform: uppercase;
-  letter-spacing: .8px;
-  margin-bottom: 3px;
-  font-family: Arial, sans-serif;
-}
-.ad-inline-text .ad-headline {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1a1a1a;
-  font-family: Arial, sans-serif;
-}
-.ad-inline-text .ad-subline {
-  font-size: 12px;
-  color: #666;
-  font-family: Arial, sans-serif;
-  margin-top: 2px;
-}
-.ad-inline-cta {
-  background: #f97316;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 8px 16px;
-  border-radius: 6px;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background .15s;
-  flex-shrink: 0;
-}
-.ad-inline-cta:hover { background: #e56b0a; }
-
-/* ── Sticky bottom bar ── */
-.ad-sticky-bottom {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: #1a1a2e;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  padding: 9px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  z-index: 400;
-  box-shadow: 0 -2px 10px rgba(0,0,0,.2);
-}
-.ad-sticky-bottom a {
-  color: #fbbf24;
-  font-weight: 700;
-  text-decoration: none;
-  transition: color .15s;
-}
-.ad-sticky-bottom a:hover { color: #f59e0b; }
-.ad-sticky-close {
-  position: absolute;
-  right: 14px; top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #888;
-  font-size: 16px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 2px 4px;
-}
-.ad-sticky-close:hover { color: #fff; }
-
-/* Make room for sticky bar */
-body { padding-bottom: 46px; }
-
-/* ── Hide ALL ad elements in print / PDF ── */
-@media print {
-  .ad-top-banner,
-  .ad-inline-card,
-  .ad-sticky-bottom { display: none !important; }
-}
-
-/* ══════════════════════════════════════
    APP BAR
 ══════════════════════════════════════ */
 .app-bar {
@@ -328,14 +192,33 @@ body { padding-bottom: 46px; }
   background: transparent;
 }
 
-/* Placeholder text */
+/* Placeholder text — slightly darker for better visibility */
 .rte-block:empty::before {
   content: attr(data-placeholder);
-  color: #c0c0c0;
+  color: #999999;
   pointer-events: none;
   font-weight: 400;
   font-style: normal;
 }
+
+/* Per-label size overrides
+   Base label: font-size 10px, padding 1px 10px
+   Company & Address → -45%: ~5.5px font, tight padding
+   Bill To           → -30%: ~7px font, moderate padding
+   Notes/Bank Details→ -50%: ~5px font, minimal padding
+*/
+#cmpZone  .rte-zone-label { font-size: 8px;  padding: 1px 6px;  letter-spacing: 0.3px; }
+#billZone .rte-zone-label { font-size: 9px;  padding: 1px 8px;  letter-spacing: 0.4px; }
+#notesZone .rte-zone-label{ font-size: 7.5px; padding: 1px 5px; letter-spacing: 0.2px; }
+
+/* Per-zone WIDTH reductions
+   Company & Address  → reduced by 45%: occupies 55% of its parent column
+   Bill To            → reduced by 30%: occupies 70% of its parent column
+   Notes/Bank Details → reduced by 50%: occupies 50% of full invoice width
+*/
+#cmpBlock-wrap   { max-width: 55%; }
+#billBlock-wrap  { max-width: 70%; }
+#notesBlock-wrap { max-width: 50%; }
 
 /* "Bill To" bold static label shown above bill block */
 .rte-label {
@@ -389,16 +272,75 @@ body { padding-bottom: 46px; }
 .meta-val::placeholder { color: var(--placeholder); }
 
 /* ══════════════════════════════════════
-   ITEMS TABLE
+   ITEMS TABLE — smoothly curved corners
 ══════════════════════════════════════ */
-.items-table { width: 100%; border-collapse: collapse; }
+
+/* Wrapper: defines the outer curve & shadow */
+.table-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #d0d0d0;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07);
+}
+
+/* border-separate is required so border-radius on cells is respected */
+.items-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Header row */
+.items-table thead tr {
+  background: linear-gradient(135deg, #2c2c2c 0%, #3a3a3a 100%);
+}
 .items-table th {
-  font-size: 13px; font-weight: 700; color: var(--dark);
-  border: 1px solid var(--border-dark);
-  padding: 7px 10px; text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 11px 12px;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .items-table th:nth-child(n+2) { text-align: center; }
-.items-table tbody td { border: 1px solid var(--border); padding: 0; vertical-align: top; }
+
+/* Round the top-left and top-right header corners */
+.items-table thead th:first-child { border-radius: 11px 0 0 0; }
+.items-table thead th:last-child  { border-radius: 0 11px 0 0; }
+
+/* Body rows */
+.items-table tbody tr {
+  border-bottom: 1px solid #ebebeb;
+  transition: background .12s;
+}
+.items-table tbody tr:nth-child(even) { background: #fafafa; }
+.items-table tbody tr:hover { background: #f0f4ff; }
+.items-table tbody td {
+  border: none;
+  border-bottom: 1px solid #ebebeb;
+  border-right: 1px solid #ebebeb;
+  padding: 0;
+  vertical-align: top;
+}
+.items-table tbody td:last-child { border-right: none; }
+.items-table tbody tr:last-child td { border-bottom: none; }
+
+/* Tfoot rows */
+.items-table tfoot tr { background: transparent; }
+.items-table tfoot td {
+  border: none;
+  border-top: 1px solid #d8d8d8;
+  border-right: 1px solid #ebebeb;
+  padding: 7px 12px;
+}
+.items-table tfoot td:last-child { border-right: none; }
+
+/* Round the bottom-left and bottom-right footer corners */
+.items-table tfoot tr:last-child td:first-child { border-radius: 0 0 0 11px; }
+.items-table tfoot tr:last-child td:last-child  { border-radius: 0 0 11px 0; }
 
 .item-desc {
   font-family: Arial, sans-serif; font-size: 13px;
@@ -426,16 +368,26 @@ body { padding-bottom: 46px; }
 }
 .rm-btn:hover { color: #666; }
 .total-row td {
-  border: 1px solid var(--border); padding: 7px 10px;
+  border: none !important;
+  border-top: 2px solid #d0d0d0 !important;
+  padding: 9px 12px;
   font-weight: 700; color: var(--dark);
+  background: #f0f0f0;
 }
 .total-row td:nth-child(2) { text-align: right; }
 .tax-row td {
-  border: 1px solid var(--border); padding: 6px 10px;
+  border: none !important;
+  border-top: 1px solid #ebebeb !important;
+  padding: 6px 12px;
   font-weight: 400; color: var(--dark);
 }
 .tax-row td:nth-child(2) { text-align: right; }
 /* Hide subtotal row when no taxes active */
+#subtotalRow td {
+  border: none !important;
+  border-top: 1px solid #ebebeb !important;
+  padding: 6px 12px;
+}
 #subtotalRow.hidden { display: none; }
 .add-row-btn {
   margin-top: 8px; font-size: 12px; color: #666; background: none;
@@ -520,10 +472,10 @@ body { padding-bottom: 46px; }
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  background: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 8px 0;
   margin-bottom: 22px;
 }
 .inv-toolbar .lbl-dark { font-size: 11px; color: #666; white-space: nowrap; }
@@ -595,15 +547,6 @@ body { padding-bottom: 46px; }
 </style>
 </head>
 <body>
-
-<!-- ══ ADSTERRA TOP BANNER ══ -->
-<div class="ad-top-banner">
-  <a href="https://www.profitablecpmratenetwork.com/uq9nyg61u?key=a14303832dbae6dd402850d8cb24a5cf"
-     target="_blank" rel="noopener sponsored">
-    <span class="ad-badge">Ad</span>
-    💡 Grow your business with smart tools &amp; offers — Click to explore
-  </a>
-</div>
 
 <!-- ══ FLOATING FORMAT TOOLBAR ══ -->
 <!-- Appears above any highlighted text inside a .rte-block -->
@@ -681,7 +624,7 @@ body { padding-bottom: 46px; }
   <div class="inv-top">
 
     <!-- Company block — single contenteditable -->
-    <div class="rte-wrap">
+    <div class="rte-wrap" id="cmpBlock-wrap">
       <div class="rte-zone" id="cmpZone">
         <span class="rte-zone-label">Company &amp; Address</span>
         <span class="rte-zone-hint">✏ Click to type</span>
@@ -714,7 +657,7 @@ body { padding-bottom: 46px; }
   <div class="billing-meta-row">
 
     <!-- Bill To block — single contenteditable -->
-    <div class="rte-wrap">
+    <div class="rte-wrap" id="billBlock-wrap">
       <div class="rte-zone" id="billZone">
         <span class="rte-zone-label">Bill To</span>
         <span class="rte-zone-hint">✏ Click to type</span>
@@ -742,6 +685,7 @@ body { padding-bottom: 46px; }
   </div>
 
   <!-- ITEMS TABLE -->
+  <div class="table-wrap">
   <table class="items-table" id="itemsTable">
     <thead>
       <tr>
@@ -755,8 +699,8 @@ body { padding-bottom: 46px; }
     <tbody id="itemsBody"></tbody>
     <tfoot id="tableFoot">
       <tr class="subtotal-row" id="subtotalRow">
-        <td colspan="3" style="text-align:right;border:1px solid #c0c0c0;padding:6px 10px;font-weight:400;">Subtotal</td>
-        <td id="subtotalDisplay" style="border:1px solid #c0c0c0;padding:6px 10px;text-align:right;font-weight:400;">₦0.00</td>
+        <td colspan="3" style="text-align:right;">Subtotal</td>
+        <td id="subtotalDisplay" style="text-align:right;">₦0.00</td>
         <td class="del-col-td" style="border:none;padding:0;width:28px;"></td>
       </tr>
       <!-- Tax rows injected here by JS -->
@@ -767,11 +711,12 @@ body { padding-bottom: 46px; }
       </tr>
     </tfoot>
   </table>
+  </div><!-- /table-wrap -->
   <button class="add-row-btn" onclick="addRow()">+ Add Item</button>
 
   <!-- NOTES / BANK DETAILS -->
   <div class="notes-section">
-    <div class="rte-wrap">
+    <div class="rte-wrap" id="notesBlock-wrap">
       <div class="rte-zone" id="notesZone">
         <span class="rte-zone-label">Notes / Bank Details</span>
         <span class="rte-zone-hint">✏ Click to type</span>
@@ -784,32 +729,6 @@ body { padding-bottom: 46px; }
 
 </div><!-- /invoice -->
 </div><!-- /page-wrap -->
-
-<!-- ══ ADSTERRA INLINE AD CARD ══ -->
-<div class="ad-inline-card">
-  <a href="https://www.profitablecpmratenetwork.com/uq9nyg61u?key=a14303832dbae6dd402850d8cb24a5cf"
-     target="_blank" rel="noopener sponsored" style="text-decoration:none;display:block;">
-    <div class="ad-inline-inner">
-      <div class="ad-inline-text">
-        <div class="ad-label">Sponsored</div>
-        <div class="ad-headline">🚀 Need more business tools &amp; resources?</div>
-        <div class="ad-subline">Discover products and services to grow your business faster</div>
-      </div>
-      <span class="ad-inline-cta">Explore Now →</span>
-    </div>
-  </a>
-</div>
-
-<!-- ══ ADSTERRA STICKY BOTTOM BAR ══ -->
-<div class="ad-sticky-bottom" id="adStickyBottom">
-  <span>💼 Free invoice tool brought to you by <strong>GraceCoin</strong> &nbsp;|&nbsp;</span>
-  <a href="https://www.profitablecpmratenetwork.com/uq9nyg61u?key=a14303832dbae6dd402850d8cb24a5cf"
-     target="_blank" rel="noopener sponsored">
-    Support us — Click here to explore our sponsors
-  </a>
-  <button class="ad-sticky-close" onclick="document.getElementById('adStickyBottom').style.display='none';document.body.style.paddingBottom='0'" title="Close">✕</button>
-</div>
-
 
 <!-- ══ TAX MODAL ══ -->
 <div class="modal-overlay" id="taxModal">
@@ -1355,7 +1274,7 @@ function buildPrintHTML() {
   const clone = inv.cloneNode(true);
 
   /* Remove edit-only UI — keep rm-btn cells but make buttons invisible */
-  clone.querySelectorAll('.inv-app-name, .inv-toolbar, .add-row-btn, input[type=file], .ad-top-banner, .ad-inline-card, .ad-sticky-bottom').forEach(el => el.remove());
+  clone.querySelectorAll('.inv-app-name, .inv-toolbar, .add-row-btn, input[type=file]').forEach(el => el.remove());
   clone.querySelectorAll('.rm-btn').forEach(el => { el.style.visibility = 'hidden'; });
   /* Collapse delete column cells — no border, no padding, no width */
   clone.querySelectorAll('.del-col-th, .del-col-td').forEach(el => {
@@ -1426,20 +1345,31 @@ body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1a1a1a;font-s
 .inv-meta{text-align:right;flex-shrink:0;font-size:13px;}
 .meta-line{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:3px;}
 .meta-val{font-size:13px;font-weight:400;color:#1a1a1a;text-align:right;display:inline;}
-.items-table{width:100%;border-collapse:collapse;}
-.items-table th{font-size:13px;font-weight:700;border:1px solid #888;padding:7px 10px;text-align:left;color:#1a1a1a;}
+.table-wrap{border-radius:12px;overflow:hidden;border:1px solid #d0d0d0;box-shadow:0 2px 12px rgba(0,0,0,.07);}
+.items-table{width:100%;border-collapse:separate;border-spacing:0;}
+.items-table thead tr{background:linear-gradient(135deg,#2c2c2c 0%,#3a3a3a 100%);}
+.items-table th{font-size:12px;font-weight:700;color:#fff;letter-spacing:0.5px;text-transform:uppercase;padding:11px 12px;text-align:left;border:none;border-bottom:1px solid rgba(255,255,255,.08);}
 .items-table th:nth-child(n+2){text-align:center;}
-.items-table td{border:1px solid #c0c0c0;padding:0;vertical-align:top;}
+.items-table thead th:first-child{border-radius:11px 0 0 0;}
+.items-table thead th:last-child{border-radius:0 11px 0 0;}
+.items-table tbody tr{border-bottom:1px solid #ebebeb;}
+.items-table tbody tr:nth-child(even){background:#fafafa;}
+.items-table tbody td{border:none;border-bottom:1px solid #ebebeb;border-right:1px solid #ebebeb;padding:0;vertical-align:top;}
+.items-table tbody td:last-child{border-right:none;}
+.items-table tbody tr:last-child td{border-bottom:none;}
+.items-table tfoot td{border:none;border-top:1px solid #d8d8d8;border-right:1px solid #ebebeb;padding:7px 12px;}
+.items-table tfoot td:last-child{border-right:none;}
+.items-table tfoot tr:last-child td:first-child{border-radius:0 0 0 11px;}
+.items-table tfoot tr:last-child td:last-child{border-radius:0 0 11px 0;}
 .item-desc{font-size:13px;padding:7px 10px;color:#1a1a1a;white-space:pre-wrap;display:block;}
 .item-num{font-size:13px;padding:7px 6px;color:#1a1a1a;text-align:center;display:block;}
 .item-amt{font-size:13px;color:#1a1a1a;padding:7px 10px;text-align:right;white-space:nowrap;}
 .rm-btn{visibility:hidden;}
 .del-col-th,.del-col-td{border:none!important;padding:0!important;width:0!important;min-width:0!important;overflow:hidden;}
-.subtotal-row td{border:1px solid #c0c0c0;padding:6px 10px;font-weight:400;color:#1a1a1a;}
-.tax-row td{border:1px solid #c0c0c0;padding:6px 10px;font-weight:400;color:#1a1a1a;}
-#subtotalRow.hidden{display:none;}
-.total-row td{border:1px solid #c0c0c0;padding:7px 10px;font-weight:700;color:#1a1a1a;}
+.subtotal-row td,.tax-row td{border:none!important;border-top:1px solid #ebebeb!important;padding:6px 12px;color:#1a1a1a;}
+.total-row td{border:none!important;border-top:2px solid #d0d0d0!important;padding:9px 12px;font-weight:700;color:#1a1a1a;background:#f0f0f0;}
 .total-row td:nth-child(2){text-align:right;}
+#subtotalRow.hidden{display:none;}
 .notes-section{margin-top:36px;}
 </style>
 </head><body><div id="invoice">${clone.innerHTML}</div></body></html>`;
@@ -1469,7 +1399,7 @@ function downloadPDF() {
   const clone = inv.cloneNode(true);
 
   /* Hide edit-only controls */
-  clone.querySelectorAll('.inv-app-name,.inv-toolbar,.app-bar,#fmtBar,.add-row-btn,input[type=file],.ad-top-banner,.ad-inline-card,.ad-sticky-bottom').forEach(el => el.remove());
+  clone.querySelectorAll('.inv-app-name,.inv-toolbar,.app-bar,#fmtBar,.add-row-btn,input[type=file]').forEach(el => el.remove());
   clone.querySelectorAll('.rm-btn').forEach(el => { el.style.visibility = 'hidden'; });
   /* Collapse delete column — no visible border or space */
   clone.querySelectorAll('.del-col-th, .del-col-td').forEach(el => {
