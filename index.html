@@ -34,7 +34,7 @@ body {
   position: sticky; top: 0; z-index: 500;
   box-shadow: 0 2px 8px rgba(0,0,0,.4);
 }
-.app-title { font-size: 14px; font-weight: 700; white-space: nowrap; }
+.app-title { font-size: 18px; font-weight: 700; white-space: nowrap; letter-spacing: 0.2px; }
 .app-title em { color: #f97316; font-style: normal; }
 .app-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
@@ -211,14 +211,14 @@ body {
 #billZone .rte-zone-label { font-size: 9px;  padding: 1px 8px;  letter-spacing: 0.4px; }
 #notesZone .rte-zone-label{ font-size: 7.5px; padding: 1px 5px; letter-spacing: 0.2px; }
 
-/* Per-zone WIDTH reductions
-   Company & Address  → reduced by 45%: occupies 55% of its parent column
-   Bill To            → reduced by 30%: occupies 70% of its parent column
-   Notes/Bank Details → reduced by 50%: occupies 50% of full invoice width
+/* Per-zone WIDTH
+   Company & Address  → 55% of its parent column
+   Bill To            → same as Company: 55%
+   Notes/Bank Details → extended to 60% (was 50%, +20% of original = 60%)
 */
 #cmpBlock-wrap   { max-width: 55%; }
-#billBlock-wrap  { max-width: 70%; }
-#notesBlock-wrap { max-width: 50%; }
+#billBlock-wrap  { max-width: 55%; }
+#notesBlock-wrap { max-width: 60%; }
 
 /* "Bill To" bold static label shown above bill block */
 .rte-label {
@@ -279,8 +279,8 @@ body {
 .table-wrap {
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #d0d0d0;
-  box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  border: 1px solid #000;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
 }
 
 /* border-separate is required so border-radius on cells is respected */
@@ -292,20 +292,21 @@ body {
 
 /* Header row */
 .items-table thead tr {
-  background: linear-gradient(135deg, #2c2c2c 0%, #3a3a3a 100%);
+  background: #0021f3;
 }
 .items-table th {
   font-size: 12px;
   font-weight: 700;
   color: #fff;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
-  padding: 11px 12px;
-  text-align: left;
+  padding: 7px 12px;
+  text-align: center;
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid #000;
+  border-right: 1px solid rgba(255,255,255,.3);
 }
-.items-table th:nth-child(n+2) { text-align: center; }
+.items-table th:last-child { border-right: none; }
 
 /* Round the top-left and top-right header corners */
 .items-table thead th:first-child { border-radius: 11px 0 0 0; }
@@ -313,15 +314,14 @@ body {
 
 /* Body rows */
 .items-table tbody tr {
-  border-bottom: 1px solid #ebebeb;
   transition: background .12s;
 }
 .items-table tbody tr:nth-child(even) { background: #fafafa; }
 .items-table tbody tr:hover { background: #f0f4ff; }
 .items-table tbody td {
   border: none;
-  border-bottom: 1px solid #ebebeb;
-  border-right: 1px solid #ebebeb;
+  border-bottom: 1px solid #000;
+  border-right: 1px solid #000;
   padding: 0;
   vertical-align: top;
 }
@@ -332,8 +332,8 @@ body {
 .items-table tfoot tr { background: transparent; }
 .items-table tfoot td {
   border: none;
-  border-top: 1px solid #d8d8d8;
-  border-right: 1px solid #ebebeb;
+  border-top: 1px solid #000;
+  border-right: 1px solid #000;
   padding: 7px 12px;
 }
 .items-table tfoot td:last-child { border-right: none; }
@@ -369,15 +369,15 @@ body {
 .rm-btn:hover { color: #666; }
 .total-row td {
   border: none !important;
-  border-top: 2px solid #d0d0d0 !important;
-  padding: 9px 12px;
+  border-top: 1px solid #000 !important;
+  padding: 7px 12px;
   font-weight: 700; color: var(--dark);
   background: #f0f0f0;
 }
 .total-row td:nth-child(2) { text-align: right; }
 .tax-row td {
   border: none !important;
-  border-top: 1px solid #ebebeb !important;
+  border-top: 1px solid #000 !important;
   padding: 6px 12px;
   font-weight: 400; color: var(--dark);
 }
@@ -385,7 +385,7 @@ body {
 /* Hide subtotal row when no taxes active */
 #subtotalRow td {
   border: none !important;
-  border-top: 1px solid #ebebeb !important;
+  border-top: 1px solid #000 !important;
   padding: 6px 12px;
 }
 #subtotalRow.hidden { display: none; }
@@ -404,6 +404,43 @@ body {
    NOTES SECTION
 ══════════════════════════════════════ */
 .notes-section { margin-top: 36px; }
+
+/* Dedicated always-visible toolbar for Notes */
+.notes-fmt-bar {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+  padding: 4px 6px;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+.notes-fmt-bar .nfb-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: Arial, sans-serif;
+  color: #333;
+  line-height: 1.5;
+  transition: all .12s;
+  white-space: nowrap;
+}
+.notes-fmt-bar .nfb-btn:hover { background: #e8e8e8; border-color: #bbb; }
+.notes-fmt-bar .nfb-btn.on    { background: #d0d8ff; border-color: #99aaee; font-weight: 700; }
+.notes-fmt-bar .nfb-sep { width: 1px; height: 16px; background: #ccc; margin: 0 3px; }
+.notes-fmt-bar .nfb-fsz {
+  width: 38px; font-size: 11px; text-align: center;
+  border: 1px solid #ccc; border-radius: 3px;
+  padding: 2px 3px; font-family: Arial, sans-serif;
+}
+@media print {
+  .notes-fmt-bar { display: none !important; }
+}
 
 /* ══════════════════════════════════════
    MODALS
@@ -454,13 +491,13 @@ body {
 ══════════════════════════════════════ */
 .inv-app-name {
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
-  color: #555;
+  color: #333;
   letter-spacing: 0.3px;
-  margin-bottom: 6px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
 }
 .inv-app-name em { color: #f97316; font-style: normal; }
 
@@ -525,10 +562,11 @@ body {
    PRINT
 ══════════════════════════════════════ */
 @media print {
-  .app-bar, #fmtBar, .inv-app-name, .inv-toolbar, .add-row-btn, .modal-overlay { display: none !important; }
-  .rm-btn { visibility: hidden; }
-  /* Collapse delete column completely */
-  .del-col-th, .del-col-td { border: none !important; padding: 0 !important; width: 0 !important; min-width: 0 !important; overflow: hidden; }
+  .app-bar, #fmtBar, .inv-app-name, .inv-toolbar, .add-row-btn, .modal-overlay,
+  .notes-fmt-bar { display: none !important; }
+  /* Hide delete column entirely — no cell, no border, no space */
+  .del-col-th, .del-col-td { display: none !important; }
+  .rm-btn { display: none !important; }
   body { background: #fff; }
   .page-wrap { padding: 0; max-width: 100%; }
   #invoice { box-shadow: none; padding: 20px 28px; }
@@ -716,6 +754,23 @@ body {
 
   <!-- NOTES / BANK DETAILS -->
   <div class="notes-section">
+
+    <!-- Dedicated formatting toolbar for Notes — always visible -->
+    <div class="notes-fmt-bar" id="notesFmtBar">
+      <button class="nfb-btn" id="nfbBold"      onmousedown="notesFmtDo(event,'bold')"     ><b>B</b></button>
+      <button class="nfb-btn" id="nfbItalic"    onmousedown="notesFmtDo(event,'italic')"   ><i>I</i></button>
+      <button class="nfb-btn" id="nfbUnderline" onmousedown="notesFmtDo(event,'underline')"><u>U</u></button>
+      <div class="nfb-sep"></div>
+      <button class="nfb-btn" onmousedown="notesSizeChange(event,-1)">A−</button>
+      <input  class="nfb-fsz" id="nfbFsz" type="number" value="13" min="8" max="48"
+              onmousedown="event.stopPropagation()"
+              onchange="notesSizeApply(event)">
+      <button class="nfb-btn" onmousedown="notesSizeChange(event,+1)">A+</button>
+      <div class="nfb-sep"></div>
+      <button class="nfb-btn" onmousedown="notesFmtClear(event)">✕ Clear</button>
+      <span style="font-size:10px;color:#aaa;margin-left:4px;font-style:italic;">Select text first, then click a button</span>
+    </div>
+
     <div class="rte-wrap" id="notesBlock-wrap">
       <div class="rte-zone" id="notesZone">
         <span class="rte-zone-label">Notes / Bank Details</span>
@@ -850,32 +905,64 @@ function formatDateInput(el) {
    PASTE HANDLER — strip all formatting,
    insert as plain text, preserve line breaks
 ══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   PASTE HANDLER — strips ALL formatting, preserves line breaks
+══════════════════════════════════════ */
 document.querySelectorAll('.rte-block').forEach(el => {
   el.addEventListener('paste', e => {
     e.preventDefault();
     const clip = e.clipboardData || window.clipboardData;
-    /* Try to get plain text; fall back to stripping HTML */
+
+    /* Get plain text — always prefer text/plain which preserves line breaks */
     let text = clip.getData('text/plain');
+
+    /* If no plain text available, strip HTML but preserve block-level line breaks */
     if (!text) {
       const html = clip.getData('text/html');
-      const tmp  = document.createElement('div');
-      tmp.innerHTML = html;
-      text = tmp.innerText || tmp.textContent || '';
+      if (html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        /* Convert block elements to line breaks before extracting text */
+        tmp.querySelectorAll('p, div, br, li, tr, h1, h2, h3, h4, h5, h6').forEach(node => {
+          if (node.tagName === 'BR') {
+            node.replaceWith('\n');
+          } else {
+            node.insertAdjacentText('afterend', '\n');
+          }
+        });
+        text = tmp.innerText || tmp.textContent || '';
+      }
     }
-    /* Insert at cursor position */
+
+    if (!text) return;
+
+    /* Normalise: collapse 3+ consecutive newlines to 2, trim trailing whitespace per line */
+    text = text
+      .split(/\r?\n/)
+      .map(line => line.trimEnd())
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n');
+
+    /* Insert as plain text at cursor — use execCommand for best compat */
     const sel = window.getSelection();
     if (!sel.rangeCount) return;
     const range = sel.getRangeAt(0);
     range.deleteContents();
-    /* Split on newlines and insert as separate text/br nodes */
-    const lines = text.split(/\r?\n/);
+
+    /* Build text nodes + br elements preserving original lines */
+    const lines = text.split('\n');
+    const frag  = document.createDocumentFragment();
     lines.forEach((line, i) => {
-      if (i > 0) range.insertNode(document.createElement('br'));
-      range.insertNode(document.createTextNode(line));
-      range.collapse(false);
+      if (i > 0) frag.appendChild(document.createElement('br'));
+      if (line.length > 0) frag.appendChild(document.createTextNode(line));
     });
+    range.insertNode(frag);
+
+    /* Move cursor to end of inserted content */
+    range.collapse(false);
     sel.removeAllRanges();
     sel.addRange(range);
+
     updateZoneState(el);
   });
 
@@ -1106,6 +1193,121 @@ document.addEventListener('mousedown', e => {
 });
 
 /* ══════════════════════════════════════
+   NOTES DEDICATED TOOLBAR
+   Uses savedRange for notesBlock — lets user
+   select text, then click any button to format
+══════════════════════════════════════ */
+let notesSavedRange = null;
+
+/* Capture selection whenever user selects inside notesBlock */
+document.getElementById('notesBlock').addEventListener('mouseup', () => {
+  const sel = window.getSelection();
+  if (sel && !sel.isCollapsed && sel.rangeCount) {
+    const r = sel.getRangeAt(0);
+    if (r.commonAncestorContainer.nodeType === 3
+      ? r.commonAncestorContainer.parentElement.closest('#notesBlock')
+      : r.commonAncestorContainer.closest?.('#notesBlock')) {
+      notesSavedRange = r.cloneRange();
+      syncNotesFmtBar();
+    }
+  }
+});
+
+document.getElementById('notesBlock').addEventListener('keyup', () => {
+  const sel = window.getSelection();
+  if (sel && !sel.isCollapsed && sel.rangeCount) {
+    notesSavedRange = sel.getRangeAt(0).cloneRange();
+    syncNotesFmtBar();
+  }
+});
+
+function syncNotesFmtBar() {
+  ['bold','italic','underline'].forEach(cmd => {
+    const id = 'nfb' + cmd.charAt(0).toUpperCase() + cmd.slice(1);
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('on', document.queryCommandState(cmd));
+  });
+}
+
+function notesRestoreSel() {
+  if (!notesSavedRange) return false;
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(notesSavedRange);
+  return true;
+}
+
+function notesFmtDo(e, cmd) {
+  e.preventDefault();
+  if (!notesRestoreSel()) return;
+  document.execCommand(cmd, false, null);
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) notesSavedRange = sel.getRangeAt(0).cloneRange();
+  syncNotesFmtBar();
+}
+
+function notesSizeChange(e, delta) {
+  e.preventDefault();
+  if (!notesRestoreSel()) return;
+  const inp = document.getElementById('nfbFsz');
+  const cur = parseInt(inp.value) || 13;
+  const nxt = Math.min(48, Math.max(8, cur + delta));
+  inp.value = nxt;
+  notesApplyFontSize(nxt);
+}
+
+function notesSizeApply(e) {
+  if (!notesRestoreSel()) return;
+  const sz = Math.min(48, Math.max(8, parseInt(e.target.value) || 13));
+  e.target.value = sz;
+  notesApplyFontSize(sz);
+}
+
+function notesApplyFontSize(px) {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  const range = sel.getRangeAt(0);
+  const frag  = range.extractContents();
+  const tmp   = document.createElement('div');
+  tmp.appendChild(frag);
+  tmp.querySelectorAll('span[style]').forEach(s => {
+    if (s.style.fontSize) s.style.removeProperty('font-size');
+    if (!s.getAttribute('style') || s.style.cssText.trim() === '') {
+      const p = s.parentNode;
+      while (s.firstChild) p.insertBefore(s.firstChild, s);
+      p.removeChild(s);
+    }
+  });
+  const span = document.createElement('span');
+  span.style.fontSize = px + 'px';
+  while (tmp.firstChild) span.appendChild(tmp.firstChild);
+  range.insertNode(span);
+  const newRange = document.createRange();
+  newRange.selectNodeContents(span);
+  sel.removeAllRanges();
+  sel.addRange(newRange);
+  notesSavedRange = newRange.cloneRange();
+  document.getElementById('nfbFsz').value = px;
+}
+
+function notesFmtClear(e) {
+  e.preventDefault();
+  if (!notesRestoreSel()) return;
+  document.execCommand('removeFormat', false, null);
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) {
+    const range = sel.getRangeAt(0);
+    const frag  = range.cloneContents();
+    const tmp   = document.createElement('div');
+    tmp.appendChild(frag);
+    const plain = tmp.innerText || tmp.textContent;
+    range.deleteContents();
+    range.insertNode(document.createTextNode(plain));
+  }
+  syncNotesFmtBar();
+}
+
+/* ══════════════════════════════════════
    CURRENCY
 ══════════════════════════════════════ */
 function updateCurrency() {
@@ -1130,11 +1332,11 @@ function addRow() {
     <td><textarea class="item-desc" id="desc${id}" rows="1"
           placeholder="Item description" oninput="autoH(this)"></textarea></td>
     <td><input class="item-num" type="number" id="qty${id}"
-          value="1" min="0" step="any" oninput="recalc()"></td>
+          value="" min="0" step="any" placeholder="0" oninput="recalc()"></td>
     <td><input class="item-num" type="text" id="rate${id}"
           inputmode="decimal" oninput="sanitiseRate(this)" placeholder="0.00"></td>
-    <td class="item-amt" id="amt${id}">₦0.00</td>
-    <td class="del-col-td" style="padding:4px;text-align:center;border:1px solid #c0c0c0;width:28px;">
+    <td class="item-amt" id="amt${id}"></td>
+    <td class="del-col-td" style="padding:4px;text-align:center;border:1px solid #000;width:28px;">
       <button class="rm-btn" onclick="removeRow(${id})">✕</button>
     </td>`;
   document.getElementById('itemsBody').appendChild(tr);
@@ -1154,12 +1356,19 @@ function sanitiseRate(el) {
 function recalc() {
   let sub = 0;
   document.querySelectorAll('#itemsBody tr').forEach(tr => {
-    const id = tr.id.replace('row','');
-    const q  = parseFloat(document.getElementById('qty'  + id)?.value) || 0;
-    const r  = parseFloat(document.getElementById('rate' + id)?.value?.replace(/,/g,'')) || 0;
-    const a  = q * r;
-    const el = document.getElementById('amt' + id);
-    if (el) el.textContent = fmt(a);
+    const id  = tr.id.replace('row','');
+    const qEl = document.getElementById('qty'  + id);
+    const rEl = document.getElementById('rate' + id);
+    const q   = parseFloat(qEl?.value) || 0;
+    const r   = parseFloat(rEl?.value?.replace(/,/g,'')) || 0;
+    const a   = q * r;
+    const el  = document.getElementById('amt' + id);
+    if (el) {
+      /* Only show amount if the user has entered something */
+      const hasInput = (qEl?.value.trim() !== '' && qEl?.value.trim() !== '0') ||
+                       (rEl?.value.trim() !== '' && rEl?.value.trim() !== '0');
+      el.textContent = hasInput ? fmt(a) : '';
+    }
     sub += a;
   });
 
@@ -1274,16 +1483,9 @@ function buildPrintHTML() {
   const clone = inv.cloneNode(true);
 
   /* Remove edit-only UI — keep rm-btn cells but make buttons invisible */
-  clone.querySelectorAll('.inv-app-name, .inv-toolbar, .add-row-btn, input[type=file]').forEach(el => el.remove());
-  clone.querySelectorAll('.rm-btn').forEach(el => { el.style.visibility = 'hidden'; });
-  /* Collapse delete column cells — no border, no padding, no width */
-  clone.querySelectorAll('.del-col-th, .del-col-td').forEach(el => {
-    el.style.border   = 'none';
-    el.style.padding  = '0';
-    el.style.width    = '0';
-    el.style.minWidth = '0';
-    el.style.overflow = 'hidden';
-  });
+  clone.querySelectorAll('.inv-app-name, .inv-toolbar, .notes-fmt-bar, .add-row-btn, input[type=file]').forEach(el => el.remove());
+  /* Remove delete column entirely — no border, no space, no empty cell */
+  clone.querySelectorAll('.del-col-th, .del-col-td, .rm-btn').forEach(el => el.remove());
   /* Hide empty logo box (no image uploaded) */
   clone.querySelectorAll('.logo-box-empty').forEach(el => { el.style.display = 'none'; });
   /* Strip rte-zone styling — clean output with no borders or badges */
@@ -1301,6 +1503,10 @@ function buildPrintHTML() {
     el.removeAttribute('contenteditable');
     el.removeAttribute('data-placeholder');
   });
+
+  /* Remove the hidden ISO date input — prevents date duplication in output */
+  const isoHidden = clone.querySelector('#invoiceDateISO');
+  if (isoHidden) isoHidden.remove();
 
   /* Freeze <input> → <span> */
   clone.querySelectorAll('input').forEach(orig=>{
@@ -1345,29 +1551,28 @@ body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1a1a1a;font-s
 .inv-meta{text-align:right;flex-shrink:0;font-size:13px;}
 .meta-line{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:3px;}
 .meta-val{font-size:13px;font-weight:400;color:#1a1a1a;text-align:right;display:inline;}
-.table-wrap{border-radius:12px;overflow:hidden;border:1px solid #d0d0d0;box-shadow:0 2px 12px rgba(0,0,0,.07);}
+.table-wrap{border-radius:12px;overflow:hidden;border:1px solid #000;box-shadow:0 2px 10px rgba(0,0,0,.08);}
 .items-table{width:100%;border-collapse:separate;border-spacing:0;}
-.items-table thead tr{background:linear-gradient(135deg,#2c2c2c 0%,#3a3a3a 100%);}
-.items-table th{font-size:12px;font-weight:700;color:#fff;letter-spacing:0.5px;text-transform:uppercase;padding:11px 12px;text-align:left;border:none;border-bottom:1px solid rgba(255,255,255,.08);}
-.items-table th:nth-child(n+2){text-align:center;}
+.items-table thead tr{background:#0021f3;}
+.items-table th{font-size:12px;font-weight:700;color:#fff;letter-spacing:0.4px;text-transform:uppercase;padding:7px 12px;text-align:center;border:none;border-bottom:1px solid #000;border-right:1px solid rgba(255,255,255,.3);}
+.items-table th:last-child{border-right:none;}
 .items-table thead th:first-child{border-radius:11px 0 0 0;}
 .items-table thead th:last-child{border-radius:0 11px 0 0;}
-.items-table tbody tr{border-bottom:1px solid #ebebeb;}
 .items-table tbody tr:nth-child(even){background:#fafafa;}
-.items-table tbody td{border:none;border-bottom:1px solid #ebebeb;border-right:1px solid #ebebeb;padding:0;vertical-align:top;}
+.items-table tbody td{border:none;border-bottom:1px solid #000;border-right:1px solid #000;padding:0;vertical-align:top;}
 .items-table tbody td:last-child{border-right:none;}
 .items-table tbody tr:last-child td{border-bottom:none;}
-.items-table tfoot td{border:none;border-top:1px solid #d8d8d8;border-right:1px solid #ebebeb;padding:7px 12px;}
+.items-table tfoot td{border:none;border-top:1px solid #000;border-right:1px solid #000;padding:7px 12px;}
 .items-table tfoot td:last-child{border-right:none;}
 .items-table tfoot tr:last-child td:first-child{border-radius:0 0 0 11px;}
 .items-table tfoot tr:last-child td:last-child{border-radius:0 0 11px 0;}
 .item-desc{font-size:13px;padding:7px 10px;color:#1a1a1a;white-space:pre-wrap;display:block;}
 .item-num{font-size:13px;padding:7px 6px;color:#1a1a1a;text-align:center;display:block;}
 .item-amt{font-size:13px;color:#1a1a1a;padding:7px 10px;text-align:right;white-space:nowrap;}
-.rm-btn{visibility:hidden;}
-.del-col-th,.del-col-td{border:none!important;padding:0!important;width:0!important;min-width:0!important;overflow:hidden;}
-.subtotal-row td,.tax-row td{border:none!important;border-top:1px solid #ebebeb!important;padding:6px 12px;color:#1a1a1a;}
-.total-row td{border:none!important;border-top:2px solid #d0d0d0!important;padding:9px 12px;font-weight:700;color:#1a1a1a;background:#f0f0f0;}
+.rm-btn{display:none!important;}
+.del-col-th,.del-col-td{display:none!important;}
+.subtotal-row td,.tax-row td{border:none!important;border-top:1px solid #000!important;padding:6px 12px;color:#1a1a1a;}
+.total-row td{border:none!important;border-top:1px solid #000!important;padding:7px 12px;font-weight:700;color:#1a1a1a;background:#f0f0f0;}
 .total-row td:nth-child(2){text-align:right;}
 #subtotalRow.hidden{display:none;}
 .notes-section{margin-top:36px;}
@@ -1399,16 +1604,9 @@ function downloadPDF() {
   const clone = inv.cloneNode(true);
 
   /* Hide edit-only controls */
-  clone.querySelectorAll('.inv-app-name,.inv-toolbar,.app-bar,#fmtBar,.add-row-btn,input[type=file]').forEach(el => el.remove());
-  clone.querySelectorAll('.rm-btn').forEach(el => { el.style.visibility = 'hidden'; });
-  /* Collapse delete column — no visible border or space */
-  clone.querySelectorAll('.del-col-th, .del-col-td').forEach(el => {
-    el.style.border   = 'none';
-    el.style.padding  = '0';
-    el.style.width    = '0';
-    el.style.minWidth = '0';
-    el.style.overflow = 'hidden';
-  });
+  clone.querySelectorAll('.inv-app-name,.inv-toolbar,.notes-fmt-bar,.app-bar,#fmtBar,.add-row-btn,input[type=file]').forEach(el => el.remove());
+  /* Remove delete column entirely */
+  clone.querySelectorAll('.del-col-th, .del-col-td, .rm-btn').forEach(el => el.remove());
   /* Hide empty logo box */
   clone.querySelectorAll('.logo-box-empty').forEach(el => { el.style.display = 'none'; });
   /* Strip rte-zone styling */
@@ -1424,6 +1622,9 @@ function downloadPDF() {
     el.removeAttribute('contenteditable');
     el.removeAttribute('data-placeholder');
   });
+  /* Remove the hidden ISO date input — prevents date duplication in output */
+  const isoHiddenDl = clone.querySelector('#invoiceDateISO');
+  if (isoHiddenDl) isoHiddenDl.remove();
   /* Freeze inputs */
   clone.querySelectorAll('input').forEach(orig => {
     const live = document.getElementById(orig.id);
