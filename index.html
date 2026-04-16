@@ -350,6 +350,7 @@ body {
 }
 .item-desc::placeholder { color: var(--placeholder); }
 
+/* Quantity — center */
 .item-num {
   font-family: Arial, sans-serif; font-size: 13px;
   border: none; outline: none; background: transparent;
@@ -358,10 +359,23 @@ body {
 }
 .item-num::placeholder { color: var(--placeholder); }
 
+/* Unit price — right aligned, same as Amount */
+.item-rate {
+  font-family: Arial, sans-serif; font-size: 13px;
+  border: none; outline: none; background: transparent;
+  padding: 7px 10px; width: 100%;
+  color: var(--dark); text-align: right; display: block;
+}
+.item-rate::placeholder { color: var(--placeholder); }
+
 .item-amt {
   font-size: 13px; color: var(--dark);
   padding: 7px 10px; text-align: right; white-space: nowrap;
 }
+
+/* Blank row — hidden in output */
+.blank-row { display: table-row; }
+
 .rm-btn {
   background: none; border: none; cursor: pointer; color: #c0c0c0;
   font-size: 13px; padding: 2px 4px; transition: color .15s;
@@ -564,23 +578,101 @@ body {
 @media print {
   .app-bar, #fmtBar, .inv-app-name, .inv-toolbar, .add-row-btn, .modal-overlay,
   .notes-fmt-bar { display: none !important; }
-  /* Hide delete column entirely — no cell, no border, no space */
+  /* Hide delete column entirely */
   .del-col-th, .del-col-td { display: none !important; }
   .rm-btn { display: none !important; }
+  /* Hide blank rows */
+  .blank-row { display: none !important; }
   body { background: #fff; }
   .page-wrap { padding: 0; max-width: 100%; }
   #invoice { box-shadow: none; padding: 20px 28px; }
   .logo-box { border: none; }
   .logo-box-empty { display: none !important; }
-  /* Strip zone styling */
   .rte-zone { border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; margin-top: 0 !important; }
   .rte-zone-label, .rte-zone-hint { display: none !important; }
   .rte-block:empty::before { content: ''; }
 }
-@media (max-width: 600px) {
-  .inv-top { flex-direction: column; }
+/* ══════════════════════════════════════
+   RESPONSIVE — works across all devices
+══════════════════════════════════════ */
+
+/* Tablet (≤768px) */
+@media (max-width: 768px) {
+  .app-bar { padding: 8px 14px; }
+  .app-title { font-size: 15px; }
+  .app-controls { gap: 5px; }
+  .inv-toolbar { flex-wrap: wrap; gap: 6px; padding: 6px 0; }
+  .ibtn { padding: 5px 9px; font-size: 11px; }
+  .isel  { font-size: 11px; padding: 4px 18px 4px 7px; }
+
+  .page-wrap { padding: 16px 12px; }
+  #invoice   { padding: 24px 20px 28px; }
+
+  .inv-top { gap: 12px; }
+  #cmpBlock-wrap, #billBlock-wrap { max-width: 100%; }
+  #notesBlock-wrap { max-width: 100%; }
+
+  .billing-meta-row { flex-direction: column; gap: 14px; }
+  .inv-meta { text-align: left; }
+  .meta-line { justify-content: flex-start; }
+  .meta-val  { width: 150px; text-align: left; }
+
+  .logo-box { width: 72px; height: 72px; }
+
+  /* Table — allow horizontal scroll on small screens */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .items-table { min-width: 480px; }
+  .items-table th, .items-table td { font-size: 11px; }
+  .items-table th { padding: 6px 8px; }
+
+  .inv-meta .meta-val { font-size: 12px; }
+}
+
+/* Mobile (≤480px) */
+@media (max-width: 480px) {
+  .app-title { font-size: 13px; }
+  .app-bar   { padding: 7px 10px; flex-wrap: wrap; gap: 8px; }
+  .app-controls { width: 100%; justify-content: flex-start; }
+  .ibtn { font-size: 11px; padding: 4px 8px; }
+
+  .page-wrap { padding: 10px 8px; }
+  #invoice   { padding: 18px 12px 22px; }
+
+  .inv-app-name { font-size: 14px; }
+  .inv-top { flex-direction: column; gap: 12px; }
+  .logo-wrap { align-self: flex-end; }
+  .logo-box  { width: 62px; height: 62px; }
+
+  .inv-title { font-size: 18px; }
+
   .billing-meta-row { flex-direction: column; }
-  #invoice { padding: 22px 16px; }
+  .inv-meta { text-align: left; }
+  .meta-line { justify-content: flex-start; }
+  .meta-val  { width: 130px; }
+
+  .rte-zone { padding: 14px 10px 8px; }
+  #cmpBlock-wrap, #billBlock-wrap, #notesBlock-wrap { max-width: 100%; }
+
+  .table-wrap  { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+  .items-table { min-width: 380px; font-size: 11px; }
+  .items-table th { padding: 5px 6px; font-size: 10px; }
+  .item-desc  { padding: 5px 6px; font-size: 11px; }
+  .item-num, .item-rate { padding: 5px 4px; font-size: 11px; }
+  .item-amt   { padding: 5px 6px; font-size: 11px; }
+
+  .add-row-btn { font-size: 11px; padding: 4px 10px; }
+  .notes-fmt-bar { gap: 2px; }
+  .nfb-btn { padding: 2px 5px; font-size: 11px; }
+  .notes-section { margin-top: 24px; }
+
+  .inv-dl-menu { min-width: 160px; right: 0; }
+}
+
+/* Very small (≤360px) */
+@media (max-width: 360px) {
+  .app-title { font-size: 12px; }
+  #invoice   { padding: 14px 10px 18px; }
+  .items-table { min-width: 320px; }
 }
 </style>
 </head>
@@ -1330,10 +1422,10 @@ function addRow() {
   tr.id = 'row' + id;
   tr.innerHTML = `
     <td><textarea class="item-desc" id="desc${id}" rows="1"
-          placeholder="Item description" oninput="autoH(this)"></textarea></td>
+          placeholder="Item description" oninput="autoH(this);recalc()"></textarea></td>
     <td><input class="item-num" type="number" id="qty${id}"
           value="" min="0" step="any" placeholder="0" oninput="recalc()"></td>
-    <td><input class="item-num" type="text" id="rate${id}"
+    <td><input class="item-rate" type="text" id="rate${id}"
           inputmode="decimal" oninput="sanitiseRate(this)" placeholder="0.00"></td>
     <td class="item-amt" id="amt${id}"></td>
     <td class="del-col-td" style="padding:4px;text-align:center;border:1px solid #000;width:28px;">
@@ -1359,14 +1451,21 @@ function recalc() {
     const id  = tr.id.replace('row','');
     const qEl = document.getElementById('qty'  + id);
     const rEl = document.getElementById('rate' + id);
+    const dEl = document.getElementById('desc' + id);
     const q   = parseFloat(qEl?.value) || 0;
     const r   = parseFloat(rEl?.value?.replace(/,/g,'')) || 0;
     const a   = q * r;
     const el  = document.getElementById('amt' + id);
+
+    /* Detect completely blank row — no description, no qty, no rate */
+    const hasDesc = dEl?.value.trim() !== '';
+    const hasQty  = qEl?.value.trim() !== '' && qEl?.value.trim() !== '0';
+    const hasRate = rEl?.value.trim() !== '' && rEl?.value.trim() !== '0';
+    const isBlank = !hasDesc && !hasQty && !hasRate;
+    tr.classList.toggle('blank-row', isBlank);
+
     if (el) {
-      /* Only show amount if the user has entered something */
-      const hasInput = (qEl?.value.trim() !== '' && qEl?.value.trim() !== '0') ||
-                       (rEl?.value.trim() !== '' && rEl?.value.trim() !== '0');
+      const hasInput = hasQty || hasRate;
       el.textContent = hasInput ? fmt(a) : '';
     }
     sub += a;
@@ -1486,6 +1585,8 @@ function buildPrintHTML() {
   clone.querySelectorAll('.inv-app-name, .inv-toolbar, .notes-fmt-bar, .add-row-btn, input[type=file]').forEach(el => el.remove());
   /* Remove delete column entirely — no border, no space, no empty cell */
   clone.querySelectorAll('.del-col-th, .del-col-td, .rm-btn').forEach(el => el.remove());
+  /* Hide blank rows in output */
+  clone.querySelectorAll('.blank-row').forEach(el => { el.style.display = 'none'; });
   /* Hide empty logo box (no image uploaded) */
   clone.querySelectorAll('.logo-box-empty').forEach(el => { el.style.display = 'none'; });
   /* Strip rte-zone styling — clean output with no borders or badges */
@@ -1568,7 +1669,9 @@ body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1a1a1a;font-s
 .items-table tfoot tr:last-child td:last-child{border-radius:0 0 11px 0;}
 .item-desc{font-size:13px;padding:7px 10px;color:#1a1a1a;white-space:pre-wrap;display:block;}
 .item-num{font-size:13px;padding:7px 6px;color:#1a1a1a;text-align:center;display:block;}
+.item-rate{font-size:13px;padding:7px 10px;color:#1a1a1a;text-align:right;display:block;}
 .item-amt{font-size:13px;color:#1a1a1a;padding:7px 10px;text-align:right;white-space:nowrap;}
+.blank-row{display:none!important;}
 .rm-btn{display:none!important;}
 .del-col-th,.del-col-td{display:none!important;}
 .subtotal-row td,.tax-row td{border:none!important;border-top:1px solid #000!important;padding:6px 12px;color:#1a1a1a;}
@@ -1607,6 +1710,8 @@ function downloadPDF() {
   clone.querySelectorAll('.inv-app-name,.inv-toolbar,.notes-fmt-bar,.app-bar,#fmtBar,.add-row-btn,input[type=file]').forEach(el => el.remove());
   /* Remove delete column entirely */
   clone.querySelectorAll('.del-col-th, .del-col-td, .rm-btn').forEach(el => el.remove());
+  /* Hide blank rows in output */
+  clone.querySelectorAll('.blank-row').forEach(el => { el.style.display = 'none'; });
   /* Hide empty logo box */
   clone.querySelectorAll('.logo-box-empty').forEach(el => { el.style.display = 'none'; });
   /* Strip rte-zone styling */
